@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QT PizzApp</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c0a;--surface:#141412;--surface2:#1c1c19;--surface3:#242420;
+  --border:#2a2a26;--border2:#383832;
+  --text:#f0ede6;--muted:#8a8880;--muted2:#5a5855;
+  --accent:#c8a96e;--accent2:#e2c888;
+  --green:#4a8a5a;--red:#b85a3a;
+  --fs:'Fira Code',monospace;--ff:'Outfit',sans-serif;--fserif:'Cormorant Garamond',Georgia,serif;
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--ff);font-size:15px;line-height:1.5;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+.app{display:flex;flex-direction:column;min-height:100dvh;max-width:680px;margin:0 auto}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);background:var(--surface)}
+.hdr-logo{font-family:var(--fserif);font-size:22px;font-weight:600;color:var(--accent2)}
+.hdr-sub{font-size:10px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase;margin-top:1px}
+.hdr-badge{font-family:var(--fs);font-size:10px;color:var(--muted);background:var(--surface2);border:1px solid var(--border2);border-radius:4px;padding:3px 8px}
+
+/* NAV */
+.nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);background:var(--surface);scrollbar-width:none;padding:0 4px}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{flex-shrink:0;padding:13px 16px;font-size:12px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--ff);white-space:nowrap;transition:color .15s,border-color .15s}
+.nav-btn.active{color:var(--accent2);border-bottom-color:var(--accent)}
+
+/* MAIN */
+.main{flex:1;padding:16px}
+.sec{display:none}.sec.active{display:block}
+.sec-title{font-family:var(--fserif);font-size:22px;font-weight:600;color:var(--accent2);margin-bottom:2px}
+.sec-sub{font-size:12px;color:var(--muted);font-weight:300;margin-bottom:16px}
+
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden}
+.card-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-hdr-title{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted2);font-weight:600}
+.card-body{padding:16px}
+
+/* FORM */
+.field{margin-bottom:14px}.field:last-child{margin-bottom:0}
+.lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500;letter-spacing:0.3px}
+.inp{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;color:var(--text);font-size:15px;font-family:var(--fs);outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+.inp:focus{border-color:var(--accent)}
+select.inp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a5855' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+.inp-wrap{position:relative}.inp-wrap .inp{padding-right:42px}
+.inp-unit{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:var(--muted);font-family:var(--fs);pointer-events:none}
+
+/* GRID 2 */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* RESULT STRIP */
+.rstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border)}
+.rcell{background:var(--surface2);padding:12px 14px;text-align:center}
+.rcell.wide{grid-column:span 3;text-align:left;padding:14px 16px}
+.rnum{font-family:var(--fs);font-size:20px;font-weight:500;color:var(--accent2);line-height:1.1}
+.rnum.big{font-size:28px}
+.rlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+
+/* DATA LIST */
+.dl-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.dl-row:last-child{border-bottom:none}
+.dl-k{font-size:13px;color:var(--muted)}.dl-v{font-family:var(--fs);font-size:14px;font-weight:500;color:var(--text)}
+.dl-row.hl .dl-k{color:var(--text);font-weight:500}.dl-row.hl .dl-v{color:var(--accent2);font-size:15px}
+
+/* INFO ROW */
+.ir{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.ir:last-child{border-bottom:none}
+.ir-k{font-size:12px;color:var(--muted)}.ir-v{font-family:var(--fs);font-size:12px;font-weight:500}
+
+/* TOGGLE */
+.tog-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.tog-lbl{font-size:12px;color:var(--muted)}
+.tog{position:relative;width:38px;height:21px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0;position:absolute}
+.t-track{position:absolute;inset:0;background:var(--border2);border-radius:11px;transition:background .2s}
+.t-thumb{position:absolute;top:3px;left:3px;width:15px;height:15px;background:var(--muted);border-radius:50%;transition:all .2s}
+input:checked~.t-track{background:var(--accent)}
+input:checked~.t-thumb{left:20px;background:#160e00}
+
+/* FERMENTO BOX */
+.fbox{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:14px}
+.fbox-title{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted2);font-weight:600;margin-bottom:12px}
+.fbox-input-row{display:flex;gap:8px;align-items:stretch;margin-top:8px}
+.fbox-input-row .inp-wrap{flex:1}
+.btn-auto{flex-shrink:0;background:none;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:0 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--ff);transition:all .2s}
+.btn-auto:active{background:var(--surface3);border-color:var(--accent);color:var(--accent2)}
+.fbox-info{font-size:11px;color:var(--muted);font-style:italic;line-height:1.6;margin-top:8px}
+
+/* FIXED TAG */
+.ftag{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.ftag-lbl{font-size:11px;color:var(--muted)}.ftag-note{font-size:10px;color:var(--muted2);margin-top:1px}
+.ftag-val{font-family:var(--fs);font-size:20px;font-weight:500;color:var(--accent2)}
+
+/* BAR */
+.bar-wrap{height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;margin-top:6px}
+.bar-fill{height:100%;border-radius:2px;transition:width .4s,background .3s}
+.bar-scale{display:flex;justify-content:space-between;margin-top:4px}
+.bar-scale span{font-size:10px;color:var(--muted2);font-family:var(--fs)}
+
+/* BLEND */
+.blend-hdr-row{display:grid;grid-template-columns:20px 1fr 72px 76px;gap:8px;padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.blend-hdr-row span{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);font-weight:600}
+.blend-total-row{display:flex;justify-content:space-between;align-items:center;padding-top:10px;margin-top:6px;border-top:1px solid var(--border)}
+
+/* BUTTONS */
+.btn{background:var(--accent);color:#160e00;border:none;border-radius:8px;padding:12px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--ff)}
+.btn:active{background:var(--accent2)}
+.btn-ghost{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:10px 14px;font-size:12px;cursor:pointer;font-family:var(--ff);transition:all .2s}
+.btn-ghost:active{border-color:var(--accent);color:var(--accent2)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+
+/* TAGS */
+.tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:4px;font-family:var(--fs);font-weight:500}
+.tag-gold{background:#1c1400;color:var(--accent2);border:1px solid #332600}
+.tag-green{background:#0d1c10;color:#6bca82;border:1px solid #1a3420}
+.tag-red{background:#1a0c08;color:#d47a5a;border:1px solid #361510}
+.tag-blue{background:#0c1620;color:#7aaad4;border:1px solid #162840}
+
+/* FORNO REF */
+.fref{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+.fref:last-child{border-bottom:none}
+.fobs{font-size:12px;color:var(--muted);line-height:1.7;font-style:italic}
+
+/* ESCALAR */
+.esc-row{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.esc-row:last-child{border-bottom:none}
+.esc-nome{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 11px;color:var(--text);font-size:13px;font-family:var(--ff);outline:none}
+.esc-nome:focus{border-color:var(--accent)}
+.esc-g{width:90px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 11px;color:var(--text);font-size:13px;font-family:var(--fs);outline:none;-webkit-appearance:none}
+.esc-g:focus{border-color:var(--accent)}
+.esc-del{background:none;border:1px solid var(--border2);color:var(--muted2);width:30px;height:36px;border-radius:6px;cursor:pointer;font-size:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.esc-del:active{border-color:var(--red);color:var(--red)}
+
+/* DIVIDER */
+.div{height:1px;background:var(--border);margin:14px 0}
+
+/* INLINE INFO BOX */
+.ibox{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+.ibox-lbl{font-size:12px;color:var(--muted)}.ibox-val{font-family:var(--fs);font-size:20px;font-weight:500;color:var(--accent2)}
+
+/* FOOTER */
+.ftr{padding:14px 20px;border-top:1px solid var(--border);background:var(--surface);display:flex;justify-content:space-between;align-items:center}
+.ftr-l{font-size:10px;color:var(--muted2)}.ftr-r{font-family:var(--fserif);font-size:13px;color:var(--accent)}
+
+@media(min-width:640px){
+  .main{padding:24px}.hdr{padding:20px 28px}.nav{padding:0 12px}
+  .rstrip{grid-template-columns:repeat(5,1fr)}.rcell.wide{grid-column:span 5}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="hdr">
+  <div><div class="hdr-logo">QT PizzApp</div><div class="hdr-sub">Ferramenta técnica</div></div>
+  <span class="hdr-badge">v1.0</span>
+</header>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="goSec(this,'massa')">Massa</button>
+  <button class="nav-btn" onclick="goSec(this,'escalar')">Escalar</button>
+  <button class="nav-btn" onclick="goSec(this,'conversao')">Conversão</button>
+  <button class="nav-btn" onclick="goSec(this,'forno')">Forno</button>
+</nav>
+
+<main class="main">
+
+<!-- ══ MASSA ══ -->
+<section class="sec active" id="massa">
+<div class="sec-title">Calculadora de Massa</div>
+<div class="sec-sub">Baker's % · por bolas ou peso de farinha</div>
+
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Parâmetros</span></div>
+  <div class="card-body">
+
+    <div class="field">
+      <label class="lbl">Calcular por</label>
+      <select class="inp" id="m-mode" onchange="calcMassa()">
+        <option value="bolas">Número de bolas</option>
+        <option value="farinha">Peso de farinha</option>
+      </select>
+    </div>
+
+    <div class="g2">
+      <div id="m-bolas-f">
+        <label class="lbl">Nº de bolas</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="m-bolas" value="6" min="1" oninput="calcMassa()"><span class="inp-unit">un</span></div>
+      </div>
+      <div id="m-farinha-f" style="display:none">
+        <label class="lbl">Farinha total</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="m-farinha-tot" value="1000" oninput="calcMassa()"><span class="inp-unit">g</span></div>
+      </div>
+      <div>
+        <label class="lbl">Peso / bola</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="m-pbola" value="270" oninput="calcMassa()"><span class="inp-unit">g</span></div>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-top:14px">
+      <div>
+        <label class="lbl">Hidratação</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="m-hidra" value="75" step="0.5" oninput="calcMassa()"><span class="inp-unit">%</span></div>
+      </div>
+      <div>
+        <label class="lbl">Sal</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="m-sal" value="3.0" step="0.1" oninput="calcMassa()"><span class="inp-unit">%</span></div>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-top:14px">
+      <div>
+        <label class="lbl">Malte</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="m-sugar" value="0" step="0.1" oninput="calcMassa()"><span class="inp-unit">%</span></div>
+      </div>
+      <div>
+        <label class="lbl">Azeite</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="m-oil" value="0" step="0.1" oninput="calcMassa()"><span class="inp-unit">%</span></div>
+      </div>
+    </div>
+
+    <!-- FERMENTO -->
+    <div class="fbox" style="margin-top:14px">
+      <div class="fbox-title">Fermento</div>
+
+      <!-- tipo -->
+      <div class="field" style="margin-bottom:10px">
+        <label class="lbl">Tipo de fermento</label>
+        <select class="inp" id="m-lev-tipo" onchange="calcFermentoAuto()">
+          <option value="fresco">Fresco (CRF)</option>
+          <option value="seco">Seco Ativo (IDY)</option>
+          <option value="natural">Natural / Levain</option>
+        </select>
+      </div>
+
+      <!-- pré-fermento embutido -->
+      <div class="field" style="margin-bottom:10px">
+        <label class="lbl">Pré-fermento</label>
+        <select class="inp" id="m-pre-ferm" onchange="calcFermentoAuto()">
+          <option value="nenhum">Nenhum</option>
+          <option value="biga">Biga (45% hidra · fixo QT)</option>
+          <option value="poolish">Poolish (100% hidra)</option>
+        </select>
+      </div>
+      <!-- % da farinha no pré-fermento, oculto quando "nenhum" -->
+      <div id="pre-pct-wrap" style="display:none;margin-bottom:10px">
+        <label class="lbl">% da farinha no pré-fermento</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="m-pre-pct" value="50" min="10" max="90" step="5" oninput="calcFermentoAuto()"><span class="inp-unit">%</span></div>
+      </div>
+
+      <!-- PROTOCOLO DE FERMENTAÇÃO -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);font-weight:600;margin-bottom:10px">Protocolo de fermentação</div>
+
+        <!-- temperatura ambiente -->
+        <div class="field" style="margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <label class="lbl" style="margin:0">Temperatura ambiente</label>
+            <label class="tog-wrap" style="gap:6px" onclick="toggleTempAmb()">
+              <span class="tog-lbl" style="font-size:11px">Usar</span>
+              <div class="tog"><input type="checkbox" id="tog-amb" checked><div class="t-track"></div><div class="t-thumb"></div></div>
+            </label>
+          </div>
+          <div id="temp-amb-wrap">
+            <div class="g2">
+              <div>
+                <label class="lbl">Temperatura</label>
+                <div class="inp-wrap"><input type="number" class="inp" id="m-temp-amb" value="22" min="15" max="32" step="1" oninput="calcFermentoAuto()"><span class="inp-unit">°C</span></div>
+              </div>
+              <div>
+                <label class="lbl">Duração</label>
+                <div class="inp-wrap"><input type="number" class="inp" id="m-h-amb" value="4" min="0" max="72" step="0.5" oninput="calcFermentoAuto()"><span class="inp-unit">h</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- temperatura controlada -->
+        <div class="field" style="margin-bottom:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <label class="lbl" style="margin:0">Temperatura controlada (câmara/geladeira)</label>
+            <label class="tog-wrap" style="gap:6px" onclick="toggleTempCtrl()">
+              <span class="tog-lbl" style="font-size:11px">Usar</span>
+              <div class="tog"><input type="checkbox" id="tog-ctrl" checked><div class="t-track"></div><div class="t-thumb"></div></div>
+            </label>
+          </div>
+          <div id="temp-ctrl-wrap">
+            <div class="g2">
+              <div>
+                <label class="lbl">Temperatura</label>
+                <div class="inp-wrap"><input type="number" class="inp" id="m-temp-ctrl" value="4" min="2" max="20" step="1" oninput="calcFermentoAuto()"><span class="inp-unit">°C</span></div>
+              </div>
+              <div>
+                <label class="lbl">Duração</label>
+                <div class="inp-wrap"><input type="number" class="inp" id="m-h-ctrl" value="44" min="0" max="72" step="0.5" oninput="calcFermentoAuto()"><span class="inp-unit">h</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- total calculado -->
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:var(--muted)">Tempo total</span>
+          <span style="font-family:var(--fs);font-size:15px;font-weight:500;color:var(--accent2)" id="m-tempo-total">48h</span>
+        </div>
+      </div>
+
+      <!-- dose -->
+      <label class="lbl">Dose calculada (%)</label>
+      <div class="fbox-input-row">
+        <div class="inp-wrap"><input type="number" class="inp" id="m-lev" value="0.08" step="0.001" oninput="calcMassa()"><span class="inp-unit">%</span></div>
+        <button class="btn-auto" onclick="calcFermentoAuto()">Auto</button>
+      </div>
+      <div class="fbox-info" id="m-lev-info"></div>
+
+      <!-- fermento extra no refresco (só aparece quando há pré-fermento) -->
+      <div id="m-lev-refresco-wrap" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+        <label class="lbl">Fermento extra no refresco (%)</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="b-lev-r" value="0" step="0.001" oninput="calcFermentoAuto()"><span class="inp-unit">%</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- RESULTADO -->
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Resultado</span></div>
+  <div class="rstrip">
+    <div class="rcell wide">
+      <div class="rnum big" id="r-farinha">—</div>
+      <div class="rlbl">Farinha total</div>
+    </div>
+    <div class="rcell"><div class="rnum" id="r-agua">—</div><div class="rlbl">Água</div></div>
+    <div class="rcell"><div class="rnum" id="r-sal">—</div><div class="rlbl">Sal</div></div>
+    <div class="rcell"><div class="rnum" id="r-lev">—</div><div class="rlbl" id="r-lev-label">Fermento</div></div>
+  </div>
+  <div class="card-body">
+    <div id="r-malte-row" class="dl-row" style="display:none"><span class="dl-k">Malte</span><span class="dl-v" id="r-malte">—</span></div>
+    <div id="r-oil-row" class="dl-row" style="display:none"><span class="dl-k">Azeite</span><span class="dl-v" id="r-oil">—</span></div>
+    <div class="dl-row hl"><span class="dl-k">Massa total</span><span class="dl-v" id="r-total">—</span></div>
+    <div class="dl-row"><span class="dl-k">Bolas</span><span class="dl-v" id="r-bolas">—</span></div>
+    <div class="dl-row"><span class="dl-k">Peso / bola</span><span class="dl-v" id="r-pbola-out">—</span></div>
+    <div class="dl-row"><span class="dl-k">Hidratação real</span><span class="dl-v" id="r-hidra-out">—</span></div>
+    <!-- pré-fermento inline no resultado -->
+    <div id="r-preferm-block" style="display:none">
+      <div class="div"></div>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted2);font-weight:600;margin-bottom:10px" id="r-preferm-title">Biga</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px">
+        <div style="background:var(--surface2);padding:10px;text-align:center"><div class="rnum" id="b-pre-total" style="font-size:15px">—</div><div class="rlbl">Pré-ferm.</div></div>
+        <div style="background:var(--surface2);padding:10px;text-align:center"><div class="rnum" id="b-pre-farinha" style="font-size:15px">—</div><div class="rlbl">Farinha</div></div>
+        <div style="background:var(--surface2);padding:10px;text-align:center"><div class="rnum" id="b-pre-agua" style="font-size:15px">—</div><div class="rlbl">Água</div></div>
+      </div>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted2);font-weight:600;margin-bottom:10px">Refresco — Impasto Finale</div>
+      <div class="dl-row"><span class="dl-k">Farinha remanescente</span><span class="dl-v" id="b-ref-farinha">—</span></div>
+      <div class="dl-row"><span class="dl-k">Água remanescente</span><span class="dl-v" id="b-ref-agua">—</span></div>
+      <div class="dl-row"><span class="dl-k">Sal</span><span class="dl-v" id="b-ref-sal">—</span></div>
+      <div class="dl-row" id="b-ref-lev-r" style="display:none"><span class="dl-k">Fermento extra refresco</span><span class="dl-v" id="b-ref-lev">—</span></div>
+      <div class="dl-row hl"><span class="dl-k">Massa total c/ pré-ferm.</span><span class="dl-v" id="b-total">—</span></div>
+      <div class="div"></div>
+      <div class="ir"><span class="ir-k">Água na biga (% do total)</span><span class="ir-v" id="b-info-aguabiga">—</span></div>
+      <div class="ir"><span class="ir-k">Hidratação verificada</span><span class="ir-v" id="b-info-hidra">—</span></div>
+      <div class="ir"><span class="ir-k">Temp. final recomendada</span><span class="ir-v">23–25 °C</span></div>
+      <div class="ir"><span class="ir-k">Adição de água</span><span class="ir-v">50–55% → gradual</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- HIDRATAÇÃO -->
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Análise de Hidratação</span></div>
+  <div class="card-body">
+    <div style="font-family:var(--fs);font-size:22px;font-weight:500;color:var(--accent2);margin-bottom:4px" id="hydra-num">—</div>
+    <div class="bar-wrap"><div class="bar-fill" id="hydra-bar" style="width:0%"></div></div>
+    <div class="bar-scale"><span>55%</span><span>62%</span><span>70%</span><span>77%</span><span>85%</span></div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px" id="hydra-status">—</div>
+    <div style="font-size:11px;color:var(--muted2);margin-top:6px;font-style:italic" id="hydra-w-rec"></div>
+  </div>
+</div>
+
+<!-- FARINHA & BLEND -->
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Farinha &amp; Blend</span></div>
+  <div class="card-body">
+
+    <!-- W da farinha ou blend -->
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:14px;margin-bottom:14px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted2);font-weight:600;margin-bottom:12px">Força (W) da farinha</div>
+
+      <!-- modo: farinha única ou blend -->
+      <div class="field" style="margin-bottom:10px">
+        <label class="lbl">Modo</label>
+        <select class="inp" id="w-mode" onchange="calcW()">
+          <option value="unica">Farinha única</option>
+          <option value="blend">Blend de farinhas</option>
+        </select>
+      </div>
+
+      <!-- farinha única -->
+      <div id="w-unica-wrap">
+        <label class="lbl">W da farinha</label>
+        <div class="inp-wrap" style="margin-bottom:8px"><input type="number" class="inp" id="w-unica" value="" placeholder="ex: 340" min="100" max="500" step="5" oninput="calcW()"><span class="inp-unit">W</span></div>
+      </div>
+
+      <!-- blend -->
+      <div id="w-blend-wrap" style="display:none">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-style:italic">Informe % e W de cada farinha. Qtd. em gramas calculada sobre a farinha total.</div>
+        <div style="display:grid;grid-template-columns:20px 1fr 64px 64px 70px;gap:6px;padding-bottom:7px;border-bottom:1px solid var(--border);margin-bottom:4px">
+          <span></span>
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);font-weight:600">Farinha</span>
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);font-weight:600;text-align:center">%</span>
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);font-weight:600;text-align:center">W</span>
+          <span style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);font-weight:600;text-align:right">Qtd.</span>
+        </div>
+        <div id="blend-rows"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;margin-top:6px;border-top:1px solid var(--border)">
+          <span class="lbl" style="margin:0">Total %</span>
+          <span id="blend-total-pct" style="font-family:var(--fs);font-size:13px;color:var(--muted)">0%</span>
+        </div>
+        <div class="bar-wrap"><div class="bar-fill" id="blend-total-bar" style="width:0%"></div></div>
+        <div id="blend-aviso" style="font-size:11px;margin-top:6px;display:none"></div>
+        <div class="btn-row">
+          <button class="btn-ghost" onclick="addBlendRow()" id="btn-add-farinha">+ Farinha</button>
+          <button class="btn-ghost" onclick="resetBlend()">Limpar</button>
+        </div>
+      </div>
+
+      <!-- resultado W -->
+      <div id="w-resultado" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <span style="font-size:12px;color:var(--muted)">W <span id="w-resultado-label">da farinha</span></span>
+          <span style="font-family:var(--fs);font-size:22px;font-weight:500;color:var(--accent2)" id="w-valor">—</span>
+        </div>
+        <div id="w-analise" style="font-size:12px;line-height:1.7;color:var(--muted)"></div>
+        <div id="w-hidra-rec" style="margin-top:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text);line-height:1.6;display:none"></div>
+        <div id="w-ferm-rec" style="margin-top:8px;font-size:11px;color:var(--muted2);font-style:italic;line-height:1.6"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BASSINAGE -->
+<div class="card">
+  <div class="card-hdr">
+    <span class="card-hdr-title">Bassinage</span>
+    <label class="tog-wrap" onclick="toggleBassinage()">
+      <span class="tog-lbl">Ativar</span>
+      <div class="tog"><input type="checkbox" id="tog-bassinage"><div class="t-track"></div><div class="t-thumb"></div></div>
+    </label>
+  </div>
+  <div id="bassinage-panel" style="display:none">
+    <div class="card-body">
+      <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px">
+        Bassinage é a adição gradual de água após o desenvolvimento do glúten, permitindo atingir hidratações mais altas do que o W suportaria diretamente.
+      </div>
+      <div class="g2">
+        <div>
+          <label class="lbl">Hidratação base (autólise/sova)</label>
+          <div class="inp-wrap"><input type="number" class="inp" id="bass-hidra-base" value="65" min="50" max="85" step="0.5" oninput="calcBassinage()"><span class="inp-unit">%</span></div>
+        </div>
+        <div>
+          <label class="lbl">Hidratação final alvo</label>
+          <div class="inp-wrap"><input type="number" class="inp" id="bass-hidra-final" value="75" min="55" max="90" step="0.5" oninput="calcBassinage()"><span class="inp-unit">%</span></div>
+        </div>
+      </div>
+      <div id="bass-resultado" style="margin-top:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px">
+          <div style="background:var(--surface2);padding:12px;text-align:center">
+            <div class="rnum" id="bass-agua-base" style="font-size:18px">—</div>
+            <div class="rlbl">Água na massa base</div>
+          </div>
+          <div style="background:var(--surface2);padding:12px;text-align:center">
+            <div class="rnum" id="bass-agua-extra" style="font-size:18px;color:#7aaad4">—</div>
+            <div class="rlbl">Bassinage (extra)</div>
+          </div>
+        </div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted2);font-weight:600;margin-bottom:10px">Protocolo recomendado</div>
+        <div id="bass-protocolo" style="font-size:13px;color:var(--text);line-height:1.8"></div>
+        <div id="bass-aviso-w" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.6"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ ESCALAR ══ -->
+<section class="sec" id="escalar">
+<div class="sec-title">Escalar Receita</div>
+<div class="sec-sub">Ajuste qualquer receita para mais ou menos bolas</div>
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Ingredientes originais</span></div>
+  <div class="card-body">
+    <div id="esc-list"></div>
+    <button class="btn-ghost" onclick="addEscIng()" style="margin-top:12px">+ Ingrediente</button>
+  </div>
+</div>
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Fator de escala</span></div>
+  <div class="card-body">
+    <div class="g2">
+      <div>
+        <label class="lbl">Rendimento original</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="esc-orig" value="6" oninput="calcEscalar()"><span class="inp-unit">bolas</span></div>
+      </div>
+      <div>
+        <label class="lbl">Rendimento desejado</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="esc-dest" value="10" oninput="calcEscalar()"><span class="inp-unit">bolas</span></div>
+      </div>
+    </div>
+    <div class="ibox" style="margin-top:12px"><span class="ibox-lbl">Fator</span><span class="ibox-val" id="esc-fator">1.667×</span></div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Receita escalada</span></div>
+  <div class="card-body">
+    <div id="esc-result"><div style="color:var(--muted);font-size:13px">Preencha a receita acima</div></div>
+    <div class="div"></div>
+    <div class="ir"><span class="ir-k">Total original</span><span class="ir-v" id="esc-tot-orig">—</span></div>
+    <div class="ir"><span class="ir-k">Total escalado</span><span class="ir-v" id="esc-tot-dest">—</span></div>
+  </div>
+</div>
+</section>
+
+<!-- ══ CONVERSAO ══ -->
+<section class="sec" id="conversao">
+<div class="sec-title">Conversão</div>
+<div class="sec-sub">Temperatura, fermento, hidratação e sal</div>
+
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Temperatura — °C ↔ °F</span></div>
+  <div class="card-body">
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="inp-wrap" style="flex:1"><input type="number" class="inp" id="cv-c" value="400" oninput="cvTemp('c')"><span class="inp-unit">°C</span></div>
+      <span style="color:var(--muted);font-size:16px;flex-shrink:0">⇌</span>
+      <div class="inp-wrap" style="flex:1"><input type="number" class="inp" id="cv-f" value="752" oninput="cvTemp('f')"><span class="inp-unit">°F</span></div>
+    </div>
+    <div class="div"></div>
+    <div class="dl-row"><span class="dl-k">Napolitana (lenha)</span><span class="dl-v">420–500 °C</span></div>
+    <div class="dl-row"><span class="dl-k">Contemporânea</span><span class="dl-v">320–400 °C</span></div>
+    <div class="dl-row"><span class="dl-k">Padela / teglia</span><span class="dl-v">280–320 °C</span></div>
+    <div class="dl-row"><span class="dl-k">Pão sourdough</span><span class="dl-v">220–250 °C</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Fermento — conversão entre tipos</span></div>
+  <div class="card-body">
+    <div class="field">
+      <label class="lbl">Fermento fresco (CRF)</label>
+      <div class="inp-wrap"><input type="number" class="inp" id="cv-ferm" value="10" oninput="cvFerm()"><span class="inp-unit">g</span></div>
+    </div>
+    <div class="dl-row"><span class="dl-k">Seco ativo (IDY)</span><span class="dl-v" id="cv-ferm-seco">—</span></div>
+    <div class="dl-row"><span class="dl-k">Instant dry (ADY)</span><span class="dl-v" id="cv-ferm-instant">—</span></div>
+    <div class="dl-row"><span class="dl-k">Levain ativo 100%</span><span class="dl-v" id="cv-ferm-levain">—</span></div>
+    <div style="font-size:11px;color:var(--muted2);line-height:1.7;margin-top:10px">Fresco ÷ 3 = seco ativo · ÷ 3.3 = instant dry · × 10 = levain</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Hidratação</span></div>
+  <div class="card-body">
+    <div class="g2">
+      <div><label class="lbl">Farinha</label><div class="inp-wrap"><input type="number" class="inp" id="cv-hf" value="1000" oninput="cvHidra()"><span class="inp-unit">g</span></div></div>
+      <div><label class="lbl">Água</label><div class="inp-wrap"><input type="number" class="inp" id="cv-ha" value="750" oninput="cvHidra()"><span class="inp-unit">g</span></div></div>
+    </div>
+    <div class="ibox" style="margin:12px 0"><span class="ibox-lbl">Hidratação resultante</span><span class="ibox-val" id="cv-hidra-res">75.0%</span></div>
+    <div class="field">
+      <label class="lbl">Calcular água para hidratação desejada</label>
+      <div class="inp-wrap"><input type="number" class="inp" id="cv-hpct" value="75" step="0.5" oninput="cvHidraPct()"><span class="inp-unit">%</span></div>
+    </div>
+    <div class="ir"><span class="ir-k">Água necessária</span><span class="ir-v" id="cv-agua-calc">750.0g</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Sal — Baker's %</span></div>
+  <div class="card-body">
+    <div class="g2">
+      <div><label class="lbl">Farinha</label><div class="inp-wrap"><input type="number" class="inp" id="cv-sal-f" value="1000" oninput="cvSal()"><span class="inp-unit">g</span></div></div>
+      <div><label class="lbl">Sal em %</label><div class="inp-wrap"><input type="number" class="inp" id="cv-sal-pct" value="3.0" step="0.1" oninput="cvSal()"><span class="inp-unit">%</span></div></div>
+    </div>
+    <div class="ibox" style="margin-top:12px"><span class="ibox-lbl">Sal em gramas</span><span class="ibox-val" id="cv-sal-res">30.0g</span></div>
+  </div>
+</div>
+</section>
+
+<!-- ══ FORNO ══ -->
+<section class="sec" id="forno">
+<div class="sec-title">Forno &amp; Cozimento</div>
+<div class="sec-sub">Parâmetros de cocção por estilo</div>
+
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Configuração</span></div>
+  <div class="card-body">
+    <div class="field">
+      <label class="lbl">Estilo de pizza</label>
+      <select class="inp" id="f-estilo" onchange="calcForno()">
+        <option value="napol">Napolitana (AVPN)</option>
+        <option value="contemp">Contemporânea</option>
+        <option value="padela">Padela / Teglia</option>
+        <option value="romana">Romana em pala</option>
+        <option value="americana">Americana / NY</option>
+      </select>
+    </div>
+    <div class="g2">
+      <div>
+        <label class="lbl">Temperatura</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="f-temp" value="470" oninput="calcForno()"><span class="inp-unit">°C</span></div>
+      </div>
+      <div>
+        <label class="lbl">Tipo de forno</label>
+        <select class="inp" id="f-tipo" onchange="calcForno()">
+          <option value="lenha">Lenha</option><option value="gas">Gás</option>
+          <option value="eletrico">Elétrico</option><option value="combinado">Combinado</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Parâmetros de cocção</span></div>
+  <div class="rstrip" style="border-radius:0">
+    <div class="rcell wide"><div class="rnum big" id="f-tempo">—</div><div class="rlbl">Tempo estimado</div></div>
+  </div>
+  <div class="card-body">
+    <div class="dl-row"><span class="dl-k">Temp. piso</span><span class="dl-v" id="f-piso">—</span></div>
+    <div class="dl-row"><span class="dl-k">Temp. cúpula</span><span class="dl-v" id="f-cupula">—</span></div>
+    <div class="dl-row"><span class="dl-k">Rotações</span><span class="dl-v" id="f-rot">—</span></div>
+    <div class="dl-row"><span class="dl-k">Entrada na câmara</span><span class="dl-v" id="f-entrada">—</span></div>
+    <div class="div"></div>
+    <div class="fobs" id="f-obs">—</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-hdr"><span class="card-hdr-title">Referência de estilos</span></div>
+  <div class="card-body">
+    <div class="fref"><span class="tag tag-gold">Napolitana</span><span style="font-size:12px;color:var(--muted)">420–500 °C · 60–90s</span></div>
+    <div class="fref"><span class="tag tag-blue">Contemporânea</span><span style="font-size:12px;color:var(--muted)">320–400 °C · 2–4 min</span></div>
+    <div class="fref"><span class="tag tag-red">Padela / Teglia</span><span style="font-size:12px;color:var(--muted)">280–320 °C · 5–8 min</span></div>
+    <div class="fref"><span class="tag tag-gold">Romana em pala</span><span style="font-size:12px;color:var(--muted)">300–360 °C · 3–5 min</span></div>
+    <div class="fref"><span class="tag tag-green">Americana / NY</span><span style="font-size:12px;color:var(--muted)">250–280 °C · 8–12 min</span></div>
+  </div>
+</div>
+</section>
+
+</main>
+
+<footer class="ftr">
+  <span class="ftr-l">QT Pizza Bar · Jardins, São Paulo</span>
+  <span class="ftr-r">QT PizzApp</span>
+</footer>
+</div>
+
+<script>
+function goSec(btn,id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ── TOGGLE TEMP ──
+function toggleTempAmb(){
+  const tog=document.getElementById('tog-amb');
+  tog.checked=!tog.checked;
+  document.getElementById('temp-amb-wrap').style.display=tog.checked?'block':'none';
+  calcFermentoAuto();
+}
+function toggleTempCtrl(){
+  const tog=document.getElementById('tog-ctrl');
+  tog.checked=!tog.checked;
+  document.getElementById('temp-ctrl-wrap').style.display=tog.checked?'block':'none';
+  calcFermentoAuto();
+}
+
+// ── TEMPO TOTAL ──
+function getTempoTotal(){
+  const useAmb=document.getElementById('tog-amb')?.checked;
+  const useCtrl=document.getElementById('tog-ctrl')?.checked;
+  const hAmb=useAmb?(+document.getElementById('m-h-amb').value||0):0;
+  const hCtrl=useCtrl?(+document.getElementById('m-h-ctrl').value||0):0;
+  return hAmb+hCtrl;
+}
+
+// ── FERMENTO — FÓRMULA DE ADROVER (mesma base do PizzApp) ──
+// L = C × e^(-K(T) × h)
+// C = 0.027 (constante empírica de calibração do PizzApp)
+// K = constante cinética por temperatura (°C)
+// Para múltiplas fases: L = C × e^(-[K1×h1 + K2×h2 + ...])
+// i.e. soma os expoentes de cada fase e aplica a exponencial uma vez só.
+
+const ADROVER_C = 0.027; // constante de calibração fermento fresco
+
+// K por temperatura (°C) — interpolação linear entre pontos do PizzApp
+const K_TABLE = {
+  2:0.0077, 4:0.0099, 6:0.0124, 8:0.0155,
+  10:0.0193,12:0.0237,14:0.0292,16:0.0360,
+  18:0.0445,20:0.0544,22:0.0667,24:0.0815,
+  26:0.0994,28:0.1208,30:0.1461,32:0.1768
+};
+
+function getK(temp){
+  // clamp
+  temp = Math.max(2, Math.min(32, temp));
+  // interpolação linear entre os dois pontos mais próximos
+  const keys = Object.keys(K_TABLE).map(Number).sort((a,b)=>a-b);
+  for(let i=0;i<keys.length-1;i++){
+    const t0=keys[i], t1=keys[i+1];
+    if(temp>=t0 && temp<=t1){
+      const r=(temp-t0)/(t1-t0);
+      return K_TABLE[t0]+(K_TABLE[t1]-K_TABLE[t0])*r;
+    }
+  }
+  return K_TABLE[32];
+}
+
+// Converte fermento fresco para outros tipos
+function converterFermento(pctFresco, tipo){
+  if(tipo==='seco')    return +(pctFresco/3).toPrecision(3);
+  if(tipo==='natural') return +(pctFresco*10).toPrecision(3); // levain ativo 100%
+  return +pctFresco.toPrecision(3);
+}
+
+function calcFermentoAuto(){
+  const tipo      = document.getElementById('m-lev-tipo')?.value||'fresco';
+  const preFerm   = document.getElementById('m-pre-ferm')?.value||'nenhum';
+  const useAmb    = document.getElementById('tog-amb')?.checked ?? true;
+  const useCtrl   = document.getElementById('tog-ctrl')?.checked ?? true;
+  const hAmb      = useAmb  ? (+document.getElementById('m-h-amb')?.value   || 0) : 0;
+  const tAmb      = +document.getElementById('m-temp-amb')?.value  || 22;
+  const hCtrl     = useCtrl ? (+document.getElementById('m-h-ctrl')?.value  || 0) : 0;
+  const tCtrl     = +document.getElementById('m-temp-ctrl')?.value || 4;
+  const hTotal    = hAmb + hCtrl;
+
+  // mostra/oculta campos de pré-fermento
+  const hasPre = preFerm !== 'nenhum';
+  document.getElementById('pre-pct-wrap').style.display       = hasPre ? 'block' : 'none';
+  document.getElementById('m-lev-refresco-wrap').style.display = hasPre ? 'block' : 'none';
+
+  set('m-tempo-total', hTotal.toFixed(1)+'h');
+
+  if(hTotal <= 0){
+    document.getElementById('m-lev-info').textContent = 'Defina o tempo de fermentação.';
+    return;
+  }
+
+  // FÓRMULA DE ADROVER — soma dos expoentes por fase
+  const exp_amb  = useAmb  && hAmb  > 0 ? getK(tAmb)  * hAmb  : 0;
+  const exp_ctrl = useCtrl && hCtrl > 0 ? getK(tCtrl) * hCtrl : 0;
+  const expoente = exp_amb + exp_ctrl;
+
+  let pctFresco = ADROVER_C * Math.exp(-expoente);
+  // clamp: mínimo 0.005%, máximo 3%
+  pctFresco = Math.max(0.005, Math.min(3.0, pctFresco));
+
+  // Pré-fermento reduz ~45% da dose (parte da atividade vem da biga)
+  if(hasPre) pctFresco = pctFresco * 0.55;
+
+  const pctFinal = converterFermento(pctFresco, tipo);
+
+  // Mensagem informativa
+  const msgs = [];
+  if(useAmb && hAmb > 0)   msgs.push(`${hAmb}h a ${tAmb}°C (ambiente)`);
+  if(useCtrl && hCtrl > 0) msgs.push(`${hCtrl}h a ${tCtrl}°C (câmara)`);
+  let info = `Protocolo: ${msgs.join(' + ')}. `;
+
+  if(hTotal <= 8)        info += 'Fermentação curta — controle de temperatura rigoroso.';
+  else if(hTotal <= 16)  info += 'Fermentação média — bulk a temperatura controlada.';
+  else if(hTotal <= 24)  info += 'Fermentação longa — retardo recomendado.';
+  else if(hTotal <= 48)  info += 'Fermentação muito longa — cold retard ou biga.';
+  else                   info += 'Fermentação ultra-longa — padrão QT. Biga + cold retard.';
+
+  if(hasPre) info += ' Dose reduzida — atividade complementada pelo pré-fermento.';
+
+  document.getElementById('m-lev').value = pctFinal;
+  document.getElementById('m-lev-info').textContent = info;
+  calcMassa();
+}
+
+// ── MASSA ──
+function calcMassa(){
+  const mode=document.getElementById('m-mode').value,isBolas=mode==='bolas';
+  document.getElementById('m-bolas-f').style.display=isBolas?'block':'none';
+  document.getElementById('m-farinha-f').style.display=isBolas?'none':'block';
+  const pb=+document.getElementById('m-pbola').value||270;
+  const h=+document.getElementById('m-hidra').value||75;
+  const sp=+document.getElementById('m-sal').value||3;
+  const lp=+document.getElementById('m-lev').value||0.08;
+  const up=+document.getElementById('m-sugar').value||0; // malte
+  const op=+document.getElementById('m-oil').value||0;
+  const tipo=document.getElementById('m-lev-tipo')?.value||'fresco';
+  const tmap={'fresco':'Fresco','seco':'Seco Ativo','natural':'Levain'};
+  let far,bolas;
+  if(isBolas){bolas=+document.getElementById('m-bolas').value||6;far=bolas*pb/(1+h/100+sp/100+lp/100+up/100+op/100);}
+  else{far=+document.getElementById('m-farinha-tot').value||1000;bolas=Math.round(far*(1+h/100+sp/100+lp/100+up/100+op/100)/pb*10)/10;}
+  const ag=far*h/100,sa=far*sp/100,le=far*lp/100,su=far*up/100,oi=far*op/100,tot=far+ag+sa+le+su+oi;
+  const f=v=>v>=100?v.toFixed(0)+'g':v>=10?v.toFixed(1)+'g':v.toFixed(2)+'g';
+  set('r-farinha',f(far));set('r-agua',f(ag));set('r-sal',f(sa));set('r-lev',f(le));
+  set('r-lev-label',tmap[tipo]||'Fermento');
+  set('r-total',f(tot));set('r-bolas',isBolas?bolas+' un':bolas.toFixed(1)+' un');
+  set('r-pbola-out',pb+'g');set('r-hidra-out',h.toFixed(1)+'%');
+  const mr=document.getElementById('r-malte-row'),or=document.getElementById('r-oil-row');
+  mr.style.display=up>0?'flex':'none';if(up>0)set('r-malte',f(su));
+  or.style.display=op>0?'flex':'none';if(op>0)set('r-oil',f(oi));
+
+  // HIDRATAÇÃO — barra 55–85%
+  const pct=Math.min(100,Math.max(0,(h-55)/30*100));
+  document.getElementById('hydra-bar').style.width=pct+'%';
+  let col,txt,wrec;
+  if(h<62){col='#555';txt='Baixa — massa firme, abertura difícil.';wrec='W recomendado: qualquer.';}
+  else if(h<65){col='var(--muted)';txt='Média-baixa — boa estrutura, abertura segura.';wrec='W recomendado: ≥ 280.';}
+  else if(h<70){col='var(--muted)';txt='Média-baixa — estrutura sólida.';wrec='W recomendado: ≥ 300.';}
+  else if(h<75){col='var(--accent)';txt='Média — referência napolitana clássica.';wrec='W recomendado: ≥ 330.';}
+  else if(h<80){col='var(--green)';txt='Alta — extensibilidade excelente.';wrec='W recomendado: ≥ 350.';}
+  else{col='var(--red)';txt='Muito alta — farinha forte e boa técnica essenciais.';wrec='W recomendado: ≥ 380.';}
+  document.getElementById('hydra-bar').style.background=col;
+  set('hydra-num',h.toFixed(1)+'%');set('hydra-status',txt);set('hydra-w-rec',wrec);
+
+  if(typeof updateBlend==='function')updateBlend();
+  if(typeof calcW==='function') calcW();
+  // recalcula pré-fermento se houver
+  const preFerm=document.getElementById('m-pre-ferm')?.value||'nenhum';
+  if(preFerm!=='nenhum') calcBiga();
+  else document.getElementById('r-preferm-block').style.display='none';
+}
+
+// ── BIGA / POOLISH (calculado inline via parâmetros) ──
+function calcBiga(){
+  const tipo=document.getElementById('m-pre-ferm').value; // 'biga' ou 'poolish'
+  const ft=parseFloat(document.getElementById('r-farinha')?.textContent)||1000;
+  const ht=+document.getElementById('m-hidra').value/100||0.75;
+  const sp=+document.getElementById('m-sal').value/100||0.03;
+  const pct=+document.getElementById('m-pre-pct')?.value/100||0.5;
+  const HP=tipo==='biga'?0.45:1.0; // biga=45% fixo QT, poolish=100%
+  const lb=+document.getElementById('m-lev').value/100||0.001;
+  const lr=+document.getElementById('b-lev-r')?.value/100||0;
+  const fb=ft*pct,ab=fb*HP,levb=fb*lb,preT=fb+ab+levb;
+  const fr=ft-fb,at=ft*ht,ar=at-ab,sal=ft*sp,levr=ft*lr,mT=preT+fr+ar+sal+levr;
+  const f=v=>v>=100?v.toFixed(0)+'g':v>=10?v.toFixed(1)+'g':v.toFixed(2)+'g';
+  const label=tipo==='biga'?'Biga':'Poolish';
+  set('r-preferm-title',label);
+  set('b-pre-total',f(preT));set('b-pre-farinha',f(fb));set('b-pre-agua',f(ab));
+  set('b-ref-farinha',f(fr));set('b-ref-agua',f(ar));set('b-ref-sal',f(sal));
+  set('b-ref-lev',f(levr));set('b-total',f(mT));
+  document.getElementById('b-ref-lev-r').style.display=lr>0?'flex':'none';
+  set('b-info-aguabiga',((ab/at)*100).toFixed(1)+'% da água total');
+  set('b-info-hidra',((at/ft)*100).toFixed(2)+'%');
+  document.getElementById('r-preferm-block').style.display='block';
+}
+
+// ── W DA FARINHA & BLEND ──
+function calcW(){
+  const mode = document.getElementById('w-mode').value;
+  document.getElementById('w-unica-wrap').style.display = mode==='unica' ? 'block' : 'none';
+  document.getElementById('w-blend-wrap').style.display = mode==='blend' ? 'block' : 'none';
+
+  let W = null;
+
+  if(mode === 'unica'){
+    const v = +document.getElementById('w-unica').value;
+    if(v >= 100) W = v;
+  } else {
+    // blend: calcula W médio ponderado
+    const rows = document.getElementById('blend-rows');
+    if(!rows) return;
+    let totalPct=0, somaW=0, valid=true;
+    rows.querySelectorAll('[data-blend-item]').forEach(item=>{
+      const pct = +item.querySelector('[data-pct]').value||0;
+      const w   = +item.querySelector('[data-w]').value||0;
+      totalPct += pct;
+      somaW    += pct * w;
+    });
+    if(totalPct > 0 && somaW > 0) W = somaW / totalPct;
+    // atualiza blend total bar
+    const bar = document.getElementById('blend-total-bar');
+    const totEl = document.getElementById('blend-total-pct');
+    const av = document.getElementById('blend-aviso');
+    if(bar) bar.style.width = Math.min(totalPct,100)+'%';
+    if(totEl) totEl.textContent = totalPct.toFixed(1)+'%';
+    if(av){
+      if(totalPct===0){bar.style.background='var(--border2)';totEl.style.color='var(--muted)';av.style.display='none';}
+      else if(Math.abs(totalPct-100)<0.05){bar.style.background='var(--green)';totEl.style.color='#6bca82';av.style.display='block';av.style.color='#6bca82';av.textContent='Blend completo — 100%';}
+      else if(totalPct>100){bar.style.background='var(--red)';totEl.style.color='#d47a5a';av.style.display='block';av.style.color='#d47a5a';av.textContent='Total excede 100%';}
+      else{bar.style.background='var(--accent)';totEl.style.color='var(--muted)';av.style.display='block';av.style.color='var(--muted)';av.textContent='Falta '+(100-totalPct).toFixed(1)+'%';}
+    }
+    // atualiza quantidades em gramas
+    const far = parseFloat(document.getElementById('r-farinha')?.textContent)||0;
+    if(far>0 && totalPct>0){
+      rows.querySelectorAll('[data-blend-item]').forEach(item=>{
+        const pct = +item.querySelector('[data-pct]').value||0;
+        const gEl = item.querySelector('[data-grams]');
+        if(gEl) gEl.textContent = pct>0 ? (far*pct/totalPct).toFixed(1)+'g' : '—';
+      });
+    }
+    set('w-resultado-label','médio do blend');
+  }
+
+  const resEl = document.getElementById('w-resultado');
+  if(W === null || W < 100){ resEl.style.display='none'; return; }
+  resEl.style.display='block';
+  if(mode==='unica') set('w-resultado-label','da farinha');
+
+  set('w-valor', W.toFixed(0));
+
+  // Análise e recomendações
+  let analise='', hidraRec='', fermRec='';
+  if(W < 180){
+    analise='Farinha muito fraca (W < 180). Uso restrito a massas de baixa hidratação e fermentação curta.';
+    hidraRec='Hidratação recomendada: 55–62%. Não suporta bassinage.';
+    fermRec='Fermentação: máx. 4–6h a temperatura ambiente. Não usar retardo.';
+  } else if(W < 240){
+    analise='Farinha fraca (W 180–240). Boa extensibilidade, pouca elasticidade. Uso em misturas ou massas simples.';
+    hidraRec='Hidratação recomendada: 58–65%. Bassinage com cautela acima de 62%.';
+    fermRec='Fermentação: 6–12h, preferencialmente sem retardo prolongado.';
+  } else if(W < 300){
+    analise='Farinha média (W 240–300). Versátil — napolitana clássica, pão. Boa relação extensibilidade/elasticidade.';
+    hidraRec='Hidratação recomendada: 63–72%. Bassinage viável acima de 68%.';
+    fermRec='Fermentação: 12–24h. Suporta retardo curto (12–18h a 4°C).';
+  } else if(W < 360){
+    analise='Farinha forte (W 300–360). Excelente para fermentações longas, alta hidratação e biga. Faixa do blend QT.';
+    hidraRec='Hidratação recomendada: 70–80%. Bassinage recomendada acima de 75%.';
+    fermRec='Fermentação: 24–48h. Ideal com biga ou retardo (24–48h a 4°C).';
+  } else if(W < 420){
+    analise='Farinha muito forte (W 360–420). Para fermentações ultra-longas, biga com alta % de farinha. Exige tempo para desenvolver.';
+    hidraRec='Hidratação recomendada: 75–85%. Bassinage necessária acima de 78%.';
+    fermRec='Fermentação: 48–72h+. Biga obrigatória. Cold retard de 48h+ recomendado.';
+  } else {
+    analise='Farinha especial (W > 420). Uso em blend com farinhas médias para equilibrar extensibilidade.';
+    hidraRec='Hidratação recomendada: em blend. Pura pode ser difícil de abrir.';
+    fermRec='Fermentação: longa, sempre em blend. Evitar uso puro.';
+  }
+
+  // Cruza com hidratação atual da calculadora
+  const hAtual = +document.getElementById('m-hidra')?.value||0;
+  let hidraMsg = hidraRec;
+  if(hAtual > 0){
+    const maxHid = W < 180?62: W<240?65: W<300?72: W<360?80: W<420?85:85;
+    const recBass = W < 240?62: W<300?68: W<360?75: W<420?78:78;
+    if(hAtual > maxHid){
+      hidraMsg += ` ⚠️ Hidratação atual (${hAtual}%) está acima do recomendado para este W — risco de massa colante sem estrutura.`;
+    } else if(hAtual >= recBass && hAtual <= maxHid){
+      hidraMsg += ` ✓ Hidratação atual (${hAtual}%) está na faixa que se beneficia de bassinage.`;
+    }
+  }
+
+  set('w-analise', analise);
+  const hidraRecEl = document.getElementById('w-hidra-rec');
+  hidraRecEl.textContent = hidraMsg;
+  hidraRecEl.style.display = 'block';
+  set('w-ferm-rec', fermRec);
+
+  // Atualiza bassinage se estiver ativo
+  if(document.getElementById('tog-bassinage')?.checked) calcBassinage();
+}
+
+// ── BASSINAGE ──
+function toggleBassinage(){
+  const tog = document.getElementById('tog-bassinage');
+  tog.checked = !tog.checked;
+  document.getElementById('bassinage-panel').style.display = tog.checked ? 'block' : 'none';
+  if(tog.checked) calcBassinage();
+}
+
+function calcBassinage(){
+  const farinha = parseFloat(document.getElementById('r-farinha')?.textContent)||0;
+  const hidraBase  = +document.getElementById('bass-hidra-base').value||65;
+  const hidraFinal = +document.getElementById('bass-hidra-final').value||75;
+
+  // pega W atual se disponível
+  const wMode = document.getElementById('w-mode')?.value||'unica';
+  let W = null;
+  if(wMode==='unica'){
+    const v = +document.getElementById('w-unica')?.value;
+    if(v>=100) W=v;
+  } else {
+    const wValEl = document.getElementById('w-valor');
+    const wVal = parseFloat(wValEl?.textContent);
+    if(wVal>=100) W=wVal;
+  }
+
+  // referência: usa farinha da calculadora ou 1000g
+  const far = farinha > 0 ? farinha : 1000;
+
+  const aguaBase  = far * hidraBase/100;
+  const aguaFinal = far * hidraFinal/100;
+  const aguaExtra = aguaFinal - aguaBase;
+
+  const f = v=>v>=100?v.toFixed(0)+'g':v.toFixed(1)+'g';
+  set('bass-agua-base',  f(aguaBase));
+  set('bass-agua-extra', aguaExtra>0 ? f(aguaExtra) : '0g');
+
+  // Protocolo baseado no delta de hidratação e W
+  const delta = hidraFinal - hidraBase;
+  const avEl  = document.getElementById('bass-aviso-w');
+
+  let protocolo = '';
+  let avisoW    = '';
+
+  if(aguaExtra <= 0){
+    set('bass-protocolo','Hidratação final ≤ hidratação base. Não há bassinage necessária.');
+    avEl.style.display='none';
+    return;
+  }
+
+  // Aviso de W
+  if(W !== null){
+    const limiteSeguro = W<240?62: W<300?68: W<360?75: W<420?82:85;
+    if(hidraFinal > limiteSeguro + 5){
+      avisoW = `⚠️ W ${W.toFixed(0)} pode não suportar ${hidraFinal}% de hidratação final de forma estável. Considere reduzir para ${limiteSeguro}% ou usar uma farinha mais forte.`;
+      avEl.style.cssText += 'background:#1a0c08;border:1px solid #361510;color:#d47a5a;';
+    } else if(hidraFinal > limiteSeguro){
+      avisoW = `✓ W ${W.toFixed(0)} suporta ${hidraFinal}% com técnica adequada. Bassinage recomendada.`;
+      avEl.style.cssText += 'background:#0d1c10;border:1px solid #1a3420;color:#6bca82;';
+    } else {
+      avisoW = `✓ W ${W.toFixed(0)} é adequado para ${hidraFinal}% de hidratação.`;
+      avEl.style.cssText += 'background:#0d1c10;border:1px solid #1a3420;color:#6bca82;';
+    }
+    avEl.textContent = avisoW;
+    avEl.style.display = 'block';
+  } else {
+    avEl.style.display = 'none';
+  }
+
+  // Protocolo por delta
+  const addEm = delta <= 5  ? 'em 1–2 adições' :
+                delta <= 10 ? 'em 2–3 adições' :
+                delta <= 15 ? 'em 3–4 adições' : 'em 4–6 adições (muito gradual)';
+
+  const ritmo = delta <= 5  ? '30–60 segundos entre cada adição' :
+                delta <= 10 ? '60–90 segundos entre cada adição' :
+                              '90–120 segundos — aguardar absorção completa antes de adicionar mais';
+
+  protocolo =
+    `1. Desenvolva o glúten com ${f(aguaBase)} de água (${hidraBase}%) até véu fino.\n` +
+    `2. Com a sova ainda em andamento (velocidade baixa), adicione ${f(aguaExtra)} de água ${addEm}.\n` +
+    `3. Cadência: ${ritmo}.\n` +
+    `4. A água de bassinage deve estar gelada (2–5 °C) para controlar a temperatura da massa.\n` +
+    (delta > 10 ? `5. Se a massa perder estrutura, pause e aguarde 2–3 min antes de continuar.\n` : '') +
+    (W && W < 300 ? `6. Com W ${W.toFixed(0)}, o glúten tem menor capacidade de absorção — trabalhe mais devagar e não force além da capacidade da farinha.` :
+                    `6. Verifique o véu ao final: a massa deve estar lisa, elástica e não colar nas mãos.`);
+
+  document.getElementById('bass-protocolo').innerText = protocolo;
+}
+
+// ── BLEND (renderização com suporte a campo W) ──
+const BC=['#c8a96e','#9a7ad4','#4a8c5c','#4a7aaa','#c05a3a','#4a8a8a','#d48a4a','#8a6a4a','#6a5a9a','#5a9a6a'];
+let blendRows=[{pct:0,w:0},{pct:0,w:0}];
+
+function renderBlendRows(){
+  const el=document.getElementById('blend-rows');if(!el)return;
+  // salva valores antes de re-render
+  el.querySelectorAll('[data-blend-item]').forEach((item,i)=>{
+    if(blendRows[i]){
+      blendRows[i].pct=parseFloat(item.querySelector('[data-pct]')?.value)||0;
+      blendRows[i].w  =parseFloat(item.querySelector('[data-w]')?.value)||0;
+    }
+  });
+  el.innerHTML='';
+  blendRows.forEach((f,i)=>{
+    const c=BC[i%BC.length];
+    const d=document.createElement('div');
+    d.setAttribute('data-blend-item','');
+    d.style.cssText='display:grid;grid-template-columns:20px 1fr 60px 60px 66px;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)';
+    d.innerHTML=`
+      <div style="width:8px;height:8px;border-radius:50%;background:${c};margin:auto"></div>
+      <span style="font-size:13px;color:var(--muted)">Farinha ${i+1}</span>
+      <div style="position:relative">
+        <input type="number" data-pct min="0" max="100" step="0.5" value="${f.pct||''}" placeholder="0"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:8px 22px 8px 8px;color:var(--text);font-size:13px;font-family:var(--fs);outline:none;text-align:center;-webkit-appearance:none"
+          oninput="blendRows[${i}].pct=+this.value||0;calcW()"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+        <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted);pointer-events:none;font-family:var(--fs)">%</span>
+      </div>
+      <div style="position:relative">
+        <input type="number" data-w min="100" max="500" step="5" value="${f.w||''}" placeholder="W"
+          style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:8px 6px;color:var(--text);font-size:13px;font-family:var(--fs);outline:none;text-align:center;-webkit-appearance:none"
+          oninput="blendRows[${i}].w=+this.value||0;calcW()"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
+      </div>
+      <span data-grams style="font-family:var(--fs);font-size:13px;color:var(--accent2);text-align:right;font-weight:500">—</span>`;
+    el.appendChild(d);
+  });
+  const btn=document.getElementById('btn-add-farinha');if(btn)btn.style.display=blendRows.length>=10?'none':'';
+  calcW();
+}
+
+function addBlendRow(){if(blendRows.length>=10)return;blendRows.push({pct:0,w:0});renderBlendRows();}
+function resetBlend(){blendRows=[{pct:0,w:0},{pct:0,w:0}];renderBlendRows();}
+
+// ── ESCALAR ──
+let escIngs=[{nome:'Farinha',g:1000},{nome:'Água',g:750},{nome:'Sal',g:30},{nome:'Levito',g:3}];
+function renderEsc(){
+  const el=document.getElementById('esc-list');el.innerHTML='';
+  escIngs.forEach((ing,i)=>{
+    const d=document.createElement('div');d.className='esc-row';
+    d.innerHTML=`
+      <input type="text" class="esc-nome" value="${ing.nome}" oninput="escIngs[${i}].nome=this.value;calcEscalar()">
+      <input type="number" class="esc-g" value="${ing.g}" oninput="escIngs[${i}].g=+this.value||0;calcEscalar()">
+      ${escIngs.length>1?`<button class="esc-del" onclick="removeEsc(${i})">✕</button>`:'<div style="width:30px"></div>'}`;
+    el.appendChild(d);
+  });calcEscalar();
+}
+function addEscIng(){escIngs.push({nome:'Ingrediente '+(escIngs.length+1),g:0});renderEsc();}
+function removeEsc(i){escIngs.splice(i,1);renderEsc();}
+function calcEscalar(){
+  const orig=+document.getElementById('esc-orig').value||1,dest=+document.getElementById('esc-dest').value||1,fator=dest/orig;
+  set('esc-fator',fator.toFixed(3)+'×');
+  const el=document.getElementById('esc-result');let html='',to=0,td=0;
+  escIngs.forEach(ing=>{if(ing.g>0){const sc=ing.g*fator;to+=ing.g;td+=sc;html+=`<div class="ir"><span class="ir-k">${ing.nome||'—'}</span><span class="ir-v">${sc.toFixed(1)}g</span></div>`;}});
+  el.innerHTML=html||'<div style="color:var(--muted);font-size:13px">Adicione quantidades</div>';
+  set('esc-tot-orig',to.toFixed(1)+'g');set('esc-tot-dest',td.toFixed(1)+'g');
+}
+
+// ── CONVERSAO ──
+function cvTemp(from){
+  if(from==='c'){const c=+document.getElementById('cv-c').value;document.getElementById('cv-f').value=(c*9/5+32).toFixed(0);}
+  else{const f=+document.getElementById('cv-f').value;document.getElementById('cv-c').value=((f-32)*5/9).toFixed(0);}
+}
+function cvFerm(){
+  const v=+document.getElementById('cv-ferm').value||0;
+  set('cv-ferm-seco',(v/3).toFixed(2)+'g');set('cv-ferm-instant',(v/3.3).toFixed(2)+'g');set('cv-ferm-levain',(v*10).toFixed(1)+'g');
+}
+function cvHidra(){
+  const f=+document.getElementById('cv-hf').value||1,a=+document.getElementById('cv-ha').value||0,h=a/f*100;
+  set('cv-hidra-res',h.toFixed(2)+'%');document.getElementById('cv-hpct').value=h.toFixed(1);set('cv-agua-calc',(f*h/100).toFixed(1)+'g');
+}
+function cvHidraPct(){
+  const f=+document.getElementById('cv-hf').value||1,p=+document.getElementById('cv-hpct').value||0,a=f*p/100;
+  document.getElementById('cv-ha').value=a.toFixed(1);set('cv-hidra-res',p.toFixed(2)+'%');set('cv-agua-calc',a.toFixed(1)+'g');
+}
+function cvSal(){set('cv-sal-res',((+document.getElementById('cv-sal-f').value||1000)*(+document.getElementById('cv-sal-pct').value||3)/100).toFixed(1)+'g');}
+
+// ── FORNO ──
+function calcForno(){
+  const e=document.getElementById('f-estilo').value,t=document.getElementById('f-tipo').value;
+  const D={napol:{tempo:'60–90 s',piso:'420–480 °C',cupula:'500–520 °C',rot:'1–2 rotações (45s)',entrada:'Bordo da boca'},contemp:{tempo:'2–4 min',piso:'340–380 °C',cupula:'380–420 °C',rot:'1–2 rotações',entrada:'Centro da câmara'},padela:{tempo:'5–8 min',piso:'280–310 °C',cupula:'300–330 °C',rot:'Sem rotação',entrada:'Posição central'},romana:{tempo:'3–5 min',piso:'300–340 °C',cupula:'340–370 °C',rot:'1 rotação a 2 min',entrada:'Centro ou lateralizado'},americana:{tempo:'8–12 min',piso:'240–270 °C',cupula:'260–290 °C',rot:'Opcional',entrada:'Centro inferior'}};
+  const O={napol:'Chama viva no lado. Delta-T piso/cúpula < 50 °C.',contemp:'Hidratação alta tolera temp. mais baixa. Favorece leopardo uniforme.',padela:'Pré-assar base 3 min antes de cobrir.',romana:'Pré-assar 2 min, cobrir e finalizar com calor superior.',americana:'Temp. baixa para assar por dentro sem queimar a crosta.'};
+  const T={lenha:' Lenha: recuperação rápida, perfil aromático superior.',gas:' Gás: temperatura estável.',eletrico:' Elétrico: controle preciso de topo e sola.',combinado:' Combinado: configure topo e sola separadamente.'};
+  const d=D[e];
+  set('f-tempo',d.tempo);set('f-piso',d.piso);set('f-cupula',d.cupula);set('f-rot',d.rot);set('f-entrada',d.entrada);set('f-obs',O[e]+T[t]);
+}
+
+// ── UTILS ──
+function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  calcFermentoAuto();
+  renderBlendRows();
+  calcW();
+  renderEsc();
+  cvFerm();cvSal();
+  calcForno();
+});
+</script>
+</body>
+</html>
