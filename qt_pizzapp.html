@@ -27,7 +27,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--ff);font-size
 /* NAV */
 .nav{display:flex;overflow-x:auto;border-bottom:1px solid var(--border);background:var(--surface);scrollbar-width:none;padding:0 4px}
 .nav::-webkit-scrollbar{display:none}
-.nav-btn{flex-shrink:0;padding:13px 16px;font-size:12px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--ff);white-space:nowrap;transition:color .15s,border-color .15s}
+.nav-btn{flex-shrink:0;min-height:44px;padding:13px 16px;font-size:12px;font-weight:500;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:var(--ff);white-space:nowrap;transition:color .15s,border-color .15s}
 .nav-btn.active{color:var(--accent2);border-bottom-color:var(--accent)}
 
 /* MAIN */
@@ -45,7 +45,7 @@ html,body{background:var(--bg);color:var(--text);font-family:var(--ff);font-size
 /* FORM */
 .field{margin-bottom:14px}.field:last-child{margin-bottom:0}
 .lbl{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;font-weight:500;letter-spacing:0.3px}
-.inp{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;color:var(--text);font-size:15px;font-family:var(--fs);outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+.inp{width:100%;min-height:44px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:11px 14px;color:var(--text);font-size:15px;font-family:var(--fs);outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
 .inp:focus{border-color:var(--accent)}
 select.inp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235a5855' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
 .inp-wrap{position:relative}.inp-wrap .inp{padding-right:42px}
@@ -109,9 +109,9 @@ input:checked~.t-thumb{left:20px;background:#160e00}
 .blend-total-row{display:flex;justify-content:space-between;align-items:center;padding-top:10px;margin-top:6px;border-top:1px solid var(--border)}
 
 /* BUTTONS */
-.btn{background:var(--accent);color:#160e00;border:none;border-radius:8px;padding:12px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--ff)}
+.btn{background:var(--accent);color:#160e00;border:none;border-radius:8px;padding:12px 20px;min-height:44px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--ff)}
 .btn:active{background:var(--accent2)}
-.btn-ghost{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:10px 14px;font-size:12px;cursor:pointer;font-family:var(--ff);transition:all .2s}
+.btn-ghost{background:none;border:1px solid var(--border2);color:var(--muted);border-radius:8px;padding:10px 14px;min-height:44px;font-size:12px;cursor:pointer;font-family:var(--ff);transition:all .2s}
 .btn-ghost:active{border-color:var(--accent);color:var(--accent2)}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 
@@ -130,11 +130,11 @@ input:checked~.t-thumb{left:20px;background:#160e00}
 /* ESCALAR */
 .esc-row{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
 .esc-row:last-child{border-bottom:none}
-.esc-nome{flex:1;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 11px;color:var(--text);font-size:13px;font-family:var(--ff);outline:none}
+.esc-nome{flex:1;min-width:0;min-height:44px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:11px;color:var(--text);font-size:13px;font-family:var(--ff);outline:none}
 .esc-nome:focus{border-color:var(--accent)}
-.esc-g{width:90px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:9px 11px;color:var(--text);font-size:13px;font-family:var(--fs);outline:none;-webkit-appearance:none}
+.esc-g{width:90px;min-height:44px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:11px;color:var(--text);font-size:13px;font-family:var(--fs);outline:none;-webkit-appearance:none}
 .esc-g:focus{border-color:var(--accent)}
-.esc-del{background:none;border:1px solid var(--border2);color:var(--muted2);width:30px;height:36px;border-radius:6px;cursor:pointer;font-size:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.esc-del{background:none;border:1px solid var(--border2);color:var(--muted2);width:44px;height:44px;border-radius:6px;cursor:pointer;font-size:13px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .esc-del:active{border-color:var(--red);color:var(--red)}
 
 /* DIVIDER */
@@ -357,17 +357,23 @@ input:checked~.t-thumb{left:20px;background:#160e00}
         <div style="background:var(--surface2);padding:10px;text-align:center"><div class="rnum" id="b-pre-farinha" style="font-size:15px">—</div><div class="rlbl">Farinha</div></div>
         <div style="background:var(--surface2);padding:10px;text-align:center"><div class="rnum" id="b-pre-agua" style="font-size:15px">—</div><div class="rlbl">Água</div></div>
       </div>
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted2);font-weight:600;margin-bottom:10px">Refresco — Impasto Finale</div>
+      <div class="dl-row"><span class="dl-k">Fermento na biga</span><span class="dl-v" id="b-pre-lev">—</span></div>
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--muted2);font-weight:600;margin:12px 0 10px">Refresco — Impasto Finale</div>
       <div class="dl-row"><span class="dl-k">Farinha remanescente</span><span class="dl-v" id="b-ref-farinha">—</span></div>
       <div class="dl-row"><span class="dl-k">Água remanescente</span><span class="dl-v" id="b-ref-agua">—</span></div>
       <div class="dl-row"><span class="dl-k">Sal</span><span class="dl-v" id="b-ref-sal">—</span></div>
       <div class="dl-row" id="b-ref-lev-r" style="display:none"><span class="dl-k">Fermento extra refresco</span><span class="dl-v" id="b-ref-lev">—</span></div>
+      <div class="dl-row" id="b-ref-malte-row" style="display:none"><span class="dl-k">Malte</span><span class="dl-v" id="b-ref-malte">—</span></div>
+      <div class="dl-row" id="b-ref-oil-row" style="display:none"><span class="dl-k">Azeite</span><span class="dl-v" id="b-ref-oil">—</span></div>
       <div class="dl-row hl"><span class="dl-k">Massa total c/ pré-ferm.</span><span class="dl-v" id="b-total">—</span></div>
       <div class="div"></div>
       <div class="ir"><span class="ir-k">Água na biga (% do total)</span><span class="ir-v" id="b-info-aguabiga">—</span></div>
       <div class="ir"><span class="ir-k">Hidratação verificada</span><span class="ir-v" id="b-info-hidra">—</span></div>
       <div class="ir"><span class="ir-k">Temp. final recomendada</span><span class="ir-v">23–25 °C</span></div>
       <div class="ir"><span class="ir-k">Adição de água</span><span class="ir-v">50–55% → gradual</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="btn-copy" onclick="copyResultado()" style="flex:1">Copiar resultado</button>
     </div>
   </div>
 </div>
@@ -700,6 +706,7 @@ function getTempoTotal(){
 // i.e. soma os expoentes de cada fase e aplica a exponencial uma vez só.
 
 const ADROVER_C = 0.027; // constante de calibração fermento fresco
+let curFar = 0;          // farinha total corrente (compartilhada entre cálculos)
 
 // K por temperatura (°C) — interpolação linear entre pontos do PizzApp
 const K_TABLE = {
@@ -731,7 +738,7 @@ function converterFermento(pctFresco, tipo){
   return +pctFresco.toPrecision(3);
 }
 
-function calcFermentoAuto(){
+function calcFermentoAuto(write=true){
   const tipo      = document.getElementById('m-lev-tipo')?.value||'fresco';
   const preFerm   = document.getElementById('m-pre-ferm')?.value||'nenhum';
   const useAmb    = document.getElementById('tog-amb')?.checked ?? true;
@@ -751,6 +758,7 @@ function calcFermentoAuto(){
 
   if(hTotal <= 0){
     document.getElementById('m-lev-info').textContent = 'Defina o tempo de fermentação.';
+    calcMassa();
     return;
   }
 
@@ -782,7 +790,7 @@ function calcFermentoAuto(){
 
   if(hasPre) info += ' Dose reduzida — atividade complementada pelo pré-fermento.';
 
-  document.getElementById('m-lev').value = pctFinal;
+  if(write) document.getElementById('m-lev').value = pctFinal;
   document.getElementById('m-lev-info').textContent = info;
   calcMassa();
 }
@@ -803,6 +811,7 @@ function calcMassa(){
   let far,bolas;
   if(isBolas){bolas=+document.getElementById('m-bolas').value||6;far=bolas*pb/(1+h/100+sp/100+lp/100+up/100+op/100);}
   else{far=+document.getElementById('m-farinha-tot').value||1000;bolas=Math.round(far*(1+h/100+sp/100+lp/100+up/100+op/100)/pb*10)/10;}
+  curFar=far;
   const ag=far*h/100,sa=far*sp/100,le=far*lp/100,su=far*up/100,oi=far*op/100,tot=far+ag+sa+le+su+oi;
   const f=v=>v>=100?v.toFixed(0)+'g':v>=10?v.toFixed(1)+'g':v.toFixed(2)+'g';
   set('r-farinha',f(far));set('r-agua',f(ag));set('r-sal',f(sa));set('r-lev',f(le));
@@ -837,25 +846,42 @@ function calcMassa(){
 // ── BIGA / POOLISH (calculado inline via parâmetros) ──
 function calcBiga(){
   const tipo=document.getElementById('m-pre-ferm').value; // 'biga' ou 'poolish'
-  const ft=parseFloat(document.getElementById('r-farinha')?.textContent)||1000;
+  const ft=curFar||1000;
   const ht=+document.getElementById('m-hidra').value/100||0.75;
   const sp=+document.getElementById('m-sal').value/100||0.03;
+  const up=+document.getElementById('m-sugar').value/100||0; // malte
+  const op=+document.getElementById('m-oil').value/100||0;   // azeite
   const pct=+document.getElementById('m-pre-pct')?.value/100||0.5;
   const HP=tipo==='biga'?0.45:1.0; // biga=45% fixo QT, poolish=100%
-  const lb=+document.getElementById('m-lev').value/100||0.001;
-  const lr=+document.getElementById('b-lev-r')?.value/100||0;
-  const fb=ft*pct,ab=fb*HP,levb=fb*lb,preT=fb+ab+levb;
-  const fr=ft-fb,at=ft*ht,ar=at-ab,sal=ft*sp,levr=ft*lr,mT=preT+fr+ar+sal+levr;
+  const lb=+document.getElementById('m-lev').value/100||0;   // dose principal → vai no pré-fermento
+  const lr=+document.getElementById('b-lev-r')?.value/100||0;// fermento extra no refresco
+  const tipoName=({fresco:'Fresco',seco:'Seco Ativo',natural:'Levain'})[document.getElementById('m-lev-tipo')?.value]||'Fermento';
+
+  // pré-fermento: farinha × pct, água pela hidra do pré-fermento, fermento (dose principal)
+  const fb=ft*pct, ab=fb*HP, levb=fb*lb, preT=fb+ab+levb;
+  // refresco / impasto finale: farinha, água, sal, malte, azeite e fermento extra remanescentes
+  const fr=ft-fb, at=ft*ht, ar=at-ab, sal=ft*sp, su=ft*up, oi=ft*op, levr=ft*lr;
+  const mT=preT+fr+ar+sal+su+oi+levr;
+
   const f=v=>v>=100?v.toFixed(0)+'g':v>=10?v.toFixed(1)+'g':v.toFixed(2)+'g';
-  const label=tipo==='biga'?'Biga':'Poolish';
-  set('r-preferm-title',label);
+  set('r-preferm-title',tipo==='biga'?'Biga':'Poolish');
   set('b-pre-total',f(preT));set('b-pre-farinha',f(fb));set('b-pre-agua',f(ab));
+  set('b-pre-lev',f(levb)+' ('+tipoName+')');
   set('b-ref-farinha',f(fr));set('b-ref-agua',f(ar));set('b-ref-sal',f(sal));
   set('b-ref-lev',f(levr));set('b-total',f(mT));
   document.getElementById('b-ref-lev-r').style.display=lr>0?'flex':'none';
-  set('b-info-aguabiga',((ab/at)*100).toFixed(1)+'% da água total');
-  set('b-info-hidra',((at/ft)*100).toFixed(2)+'%');
+  const brm=document.getElementById('b-ref-malte-row'),bro=document.getElementById('b-ref-oil-row');
+  brm.style.display=up>0?'flex':'none';if(up>0)set('b-ref-malte',f(su));
+  bro.style.display=op>0?'flex':'none';if(op>0)set('b-ref-oil',f(oi));
+  set('b-info-aguabiga',(at>0?(ab/at)*100:0).toFixed(1)+'% da água total');
+  set('b-info-hidra',(ft>0?(at/ft)*100:0).toFixed(2)+'%');
   document.getElementById('r-preferm-block').style.display='block';
+
+  // Card principal: quando há pré-fermento, o fermento exibido é o do REFRESCO (não o total).
+  // O fermento do pré-fermento aparece no bloco Biga/Poolish acima. Massa total unificada.
+  set('r-lev',f(levr));
+  set('r-lev-label','Ferm. refresco');
+  set('r-total',f(mT));
 }
 
 // ── W DA FARINHA & BLEND ──
@@ -1017,13 +1043,13 @@ function calcBassinage(){
     const limiteSeguro = W<240?62: W<300?68: W<360?75: W<420?82:85;
     if(hidraFinal > limiteSeguro + 5){
       avisoW = `⚠️ W ${W.toFixed(0)} pode não suportar ${hidraFinal}% de hidratação final de forma estável. Considere reduzir para ${limiteSeguro}% ou usar uma farinha mais forte.`;
-      avEl.style.cssText += 'background:#1a0c08;border:1px solid #361510;color:#d47a5a;';
+      avEl.style.background='#1a0c08';avEl.style.border='1px solid #361510';avEl.style.color='#d47a5a';
     } else if(hidraFinal > limiteSeguro){
       avisoW = `✓ W ${W.toFixed(0)} suporta ${hidraFinal}% com técnica adequada. Bassinage recomendada.`;
-      avEl.style.cssText += 'background:#0d1c10;border:1px solid #1a3420;color:#6bca82;';
+      avEl.style.background='#0d1c10';avEl.style.border='1px solid #1a3420';avEl.style.color='#6bca82';
     } else {
       avisoW = `✓ W ${W.toFixed(0)} é adequado para ${hidraFinal}% de hidratação.`;
-      avEl.style.cssText += 'background:#0d1c10;border:1px solid #1a3420;color:#6bca82;';
+      avEl.style.background='#0d1c10';avEl.style.border='1px solid #1a3420';avEl.style.color='#6bca82';
     }
     avEl.textContent = avisoW;
     avEl.style.display = 'block';
@@ -1076,14 +1102,14 @@ function renderBlendRows(){
       <span style="font-size:13px;color:var(--muted)">Farinha ${i+1}</span>
       <div style="position:relative">
         <input type="number" data-pct min="0" max="100" step="0.5" value="${f.pct||''}" placeholder="0"
-          style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:8px 22px 8px 8px;color:var(--text);font-size:13px;font-family:var(--fs);outline:none;text-align:center;-webkit-appearance:none"
+          style="width:100%;min-height:44px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:11px 22px 11px 8px;color:var(--text);font-size:13px;font-family:var(--fs);outline:none;text-align:center;-webkit-appearance:none"
           oninput="blendRows[${i}].pct=+this.value||0;calcW()"
           onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
         <span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted);pointer-events:none;font-family:var(--fs)">%</span>
       </div>
       <div style="position:relative">
         <input type="number" data-w min="100" max="500" step="5" value="${f.w||''}" placeholder="W"
-          style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:8px 6px;color:var(--text);font-size:13px;font-family:var(--fs);outline:none;text-align:center;-webkit-appearance:none"
+          style="width:100%;min-height:44px;background:var(--surface2);border:1px solid var(--border2);border-radius:7px;padding:11px 6px;color:var(--text);font-size:13px;font-family:var(--fs);outline:none;text-align:center;-webkit-appearance:none"
           oninput="blendRows[${i}].w=+this.value||0;calcW()"
           onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border2)'">
       </div>
@@ -1098,7 +1124,7 @@ function addBlendRow(){if(blendRows.length>=10)return;blendRows.push({pct:0,w:0}
 function resetBlend(){blendRows=[{pct:0,w:0},{pct:0,w:0}];renderBlendRows();}
 
 // ── ESCALAR ──
-let escIngs=[{nome:'Farinha',g:1000},{nome:'Água',g:750},{nome:'Sal',g:30},{nome:'Levito',g:3}];
+let escIngs=[{nome:'Farinha',g:1000},{nome:'Água',g:750},{nome:'Sal',g:30},{nome:'Fermento',g:3}];
 function renderEsc(){
   const el=document.getElementById('esc-list');el.innerHTML='';
   escIngs.forEach((ing,i)=>{
@@ -1153,14 +1179,118 @@ function calcForno(){
 // ── UTILS ──
 function set(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
 
+// ── COPIAR RESULTADO ──
+function copyResultado(){
+  const g=id=>document.getElementById(id);
+  const txt=id=>{const el=g(id);return el?el.textContent:'';};
+  const vis=id=>{const el=g(id);return el&&el.style.display!=='none';};
+  const preFerm=g('m-pre-ferm').value;
+  const tipoFull=({fresco:'Fresco (CRF)',seco:'Seco Ativo (IDY)',natural:'Levain'})[g('m-lev-tipo').value]||'Fermento';
+  const L=[];
+  L.push('QT PizzApp — Receita');
+  L.push('══════════════════════');
+  L.push('Farinha total: '+txt('r-farinha'));
+  L.push('Água: '+txt('r-agua')+'  ('+txt('r-hidra-out')+' hidratação)');
+  L.push('Sal: '+txt('r-sal'));
+  if(vis('r-malte-row')) L.push('Malte: '+txt('r-malte'));
+  if(vis('r-oil-row'))   L.push('Azeite: '+txt('r-oil'));
+  L.push(txt('r-lev-label')+' ('+tipoFull+'): '+txt('r-lev'));
+  L.push('Massa total: '+txt('r-total'));
+  L.push('Bolas: '+txt('r-bolas')+'  ·  '+txt('r-pbola-out')+'/bola');
+  L.push('');
+  L.push('FERMENTAÇÃO — '+txt('m-tempo-total')+' total');
+  if(g('tog-amb').checked)  L.push('  • '+(g('m-h-amb').value||0)+'h a '+(g('m-temp-amb').value||0)+'°C (ambiente)');
+  if(g('tog-ctrl').checked) L.push('  • '+(g('m-h-ctrl').value||0)+'h a '+(g('m-temp-ctrl').value||0)+'°C (câmara/geladeira)');
+  if(preFerm!=='nenhum'){
+    L.push('');
+    L.push((preFerm==='biga'?'BIGA':'POOLISH')+' — '+(g('m-pre-pct').value||0)+'% da farinha');
+    L.push('  Pré-fermento: '+txt('b-pre-total'));
+    L.push('  Farinha: '+txt('b-pre-farinha')+' · Água: '+txt('b-pre-agua')+' · Fermento: '+txt('b-pre-lev'));
+    L.push('  Refresco → Farinha: '+txt('b-ref-farinha')+' · Água: '+txt('b-ref-agua')+' · Sal: '+txt('b-ref-sal'));
+    if(vis('b-ref-malte-row')) L.push('    Malte: '+txt('b-ref-malte'));
+    if(vis('b-ref-oil-row'))   L.push('    Azeite: '+txt('b-ref-oil'));
+    if(vis('b-ref-lev-r'))     L.push('    Fermento extra refresco: '+txt('b-ref-lev'));
+    L.push('  Massa total c/ pré-ferm.: '+txt('b-total'));
+  }
+  if(vis('w-resultado')) L.push('\nFarinha — W '+txt('w-valor'));
+  if(g('tog-bassinage').checked && vis('bass-resultado')){
+    L.push('');
+    L.push('BASSINAGE');
+    L.push('  Água na massa base: '+txt('bass-agua-base'));
+    L.push('  Bassinage (extra): '+txt('bass-agua-extra'));
+  }
+  const out=L.join('\n');
+  const done=()=>{const b=g('btn-copy');if(!b)return;const o=b.textContent;b.textContent='Copiado ✓';setTimeout(()=>{b.textContent=o;},1600);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(out).then(done).catch(()=>fallbackCopy(out,done));
+  } else fallbackCopy(out,done);
+}
+function fallbackCopy(text,cb){
+  const ta=document.createElement('textarea');
+  ta.value=text;ta.style.position='fixed';ta.style.top='-9999px';ta.style.opacity='0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');cb&&cb();}catch(e){}
+  document.body.removeChild(ta);
+}
+
+// ── PERSISTÊNCIA (localStorage) ──
+const LS_KEY='qtpizzapp_state_v1';
+const PERSIST_IDS=[
+  'm-mode','m-bolas','m-farinha-tot','m-pbola','m-hidra','m-sal','m-sugar','m-oil',
+  'm-lev-tipo','m-pre-ferm','m-pre-pct','m-temp-amb','m-h-amb','m-temp-ctrl','m-h-ctrl',
+  'm-lev','b-lev-r','w-mode','w-unica','bass-hidra-base','bass-hidra-final',
+  'esc-orig','esc-dest','cv-c','cv-f','cv-ferm','cv-hf','cv-ha','cv-hpct',
+  'cv-sal-f','cv-sal-pct','f-estilo','f-temp','f-tipo'
+];
+const PERSIST_CHECKS=['tog-amb','tog-ctrl','tog-bassinage'];
+let _restoring=false;
+function saveState(){
+  if(_restoring)return;
+  try{
+    const data={fields:{},checks:{},blend:blendRows,esc:escIngs};
+    PERSIST_IDS.forEach(id=>{const el=document.getElementById(id);if(el)data.fields[id]=el.value;});
+    PERSIST_CHECKS.forEach(id=>{const el=document.getElementById(id);if(el)data.checks[id]=el.checked;});
+    localStorage.setItem(LS_KEY,JSON.stringify(data));
+  }catch(e){}
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);if(!raw)return false;
+    const data=JSON.parse(raw);
+    if(Array.isArray(data.blend)&&data.blend.length) blendRows=data.blend.map(r=>({pct:+r.pct||0,w:+r.w||0}));
+    if(Array.isArray(data.esc)&&data.esc.length)     escIngs =data.esc.map(r=>({nome:r.nome!=null?r.nome:'',g:+r.g||0}));
+    if(data.fields) Object.keys(data.fields).forEach(id=>{const el=document.getElementById(id);if(el)el.value=data.fields[id];});
+    if(data.checks) Object.keys(data.checks).forEach(id=>{const el=document.getElementById(id);if(el)el.checked=!!data.checks[id];});
+    return true;
+  }catch(e){return false;}
+}
+function applyPanelVisibility(){
+  const show=(id,on)=>{const el=document.getElementById(id);if(el)el.style.display=on?'block':'none';};
+  show('temp-amb-wrap',  document.getElementById('tog-amb')?.checked);
+  show('temp-ctrl-wrap', document.getElementById('tog-ctrl')?.checked);
+  show('bassinage-panel',document.getElementById('tog-bassinage')?.checked);
+  const hasPre=(document.getElementById('m-pre-ferm')?.value||'nenhum')!=='nenhum';
+  show('pre-pct-wrap',hasPre);
+  show('m-lev-refresco-wrap',hasPre);
+}
+
 // ── INIT ──
 document.addEventListener('DOMContentLoaded',()=>{
-  calcFermentoAuto();
+  _restoring=true;
+  const restored=loadState();
+  applyPanelVisibility();
   renderBlendRows();
-  calcW();
   renderEsc();
+  // Se restaurado, preservar a dose salva (não sobrescrever com Auto)
+  calcFermentoAuto(!restored);
+  calcW();
+  if(document.getElementById('tog-bassinage')?.checked) calcBassinage();
   cvFerm();cvSal();
   calcForno();
+  _restoring=false;
+  // salvar a cada alteração de qualquer campo
+  document.addEventListener('input',saveState);
+  document.addEventListener('change',saveState);
 });
 </script>
 </body>
