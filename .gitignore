@@ -1,0 +1,5 @@
+# Netlify local deploy state
+.netlify/
+
+# Local Claude Code settings
+.claude/settings.local.json
