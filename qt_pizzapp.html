@@ -142,6 +142,9 @@ const FERM_A=7.327, FERM_P=1.4534, FERM_Q=1.1365;
 const POOLISH_A=3.9108, POOLISH_K=0.23089;
 // Biga: 1,0% sobre a farinha da biga — padrão italiano (Giorilli, 44–45%, 18–24h a 18 °C).
 const BIGA_PCT=1.0;
+// Maturação da biga: 18h a 18°C (Giorilli documenta 18/24h). O poolish tem
+// campo próprio de horas. Usada só para exibir o tempo real da receita.
+const BIGA_H=18;
 const LS='qtpizzapp_v2';
 
 const rate=t=>Math.pow(FERM_Q,Math.max(2,Math.min(35,t))-20);
@@ -199,7 +202,9 @@ function calc(){
   const HP = p.pre==='poolish'?1:0.45;
   const fb = p.pre!=='nenhum' ? far*p.prePct/100 : 0;
   const ab = fb*HP, levb = far*levPre/100, levr = far*levRef/100;
+  const horasPre = p.pre==='nenhum' ? 0 : (p.pre==='poolish' ? p.poolishH : BIGA_H);
   return {far,agua,salg,levg,maltg,azg,lev,total,horas:p.hAmb+p.hCtrl,
+    horasPre, horasReal:horasPre+p.hAmb+p.hCtrl,
     fb,ab,levb,fr:far-fb,ar:agua-ab,levr,direta,dosePre,prePctF,
     excesso: direta>0 ? prePctF/direta : 0};
 }
@@ -270,12 +275,12 @@ A.copiar=()=>{
   L.push('Massa total '+g(c.total)+' g');
   if(p.perda>0)L.push('Margem de perda '+n(p.perda,1)+'%');
   L.push(p.bolas+' bolas de '+n(p.pbola,0)+' g','',
-    'FERMENTAÇÃO — '+n(c.horas,0)+'h',
+    'FERMENTAÇÃO — '+n(c.horasReal,0)+'h no total',
     '  '+n(p.hAmb,0)+'h a '+p.tAmb+' °C (ambiente)','  '+n(p.hCtrl,0)+'h a '+p.tCtrl+' °C (câmara)');
   if(p.pre!=='nenhum'){
     L.push('',(p.pre==='biga'?'BIGA':'POOLISH')+' — '+n(p.prePct,0)+'% da farinha'
       +(p.pre==='poolish'?' · '+n(p.poolishH,0)+'h a 18 °C':''));
-    L.push('  Farinha '+g(c.fb)+' g · Água '+g(c.ab)+' g · Fermento '+g(c.levb)+' g');
+    L.push('  '+n(c.horasPre,0)+'h a 18 °C · Farinha '+g(c.fb)+' g · Água '+g(c.ab)+' g · Fermento '+g(c.levb)+' g');
     L.push('  Impasto finale → Farinha '+g(c.fr)+' g · Água '+g(c.ar)+' g · Sal '+g(c.salg)+' g'
       +(c.levr>0.005?' · Fermento '+g(c.levr)+' g':' · sem fermento'));
   }
@@ -326,7 +331,8 @@ const item=(nome,meta,onOpen,onDel)=>
   ${onDel?`<button class="it-a bd" onclick="${onDel}" aria-label="apagar">×</button>`:'<div class="it-a">→</div>'}</div>`;
 const secTitle=(ov,disp,sub)=>`<div><div class="ov">${ov}</div><div class="disp" style="margin-top:8px">${disp}</div>
   ${sub?`<div class="ttl-s">${sub}</div>`:''}</div><div class="hair"></div>`;
-const metaTxt=r=>{const h=(r.hAmb||0)+(r.hCtrl||0);
+const metaTxt=r=>{const hp=r.pre==='nenhum'?0:(r.pre==='poolish'?(r.poolishH||12):BIGA_H);
+  const h=(r.hAmb||0)+(r.hCtrl||0)+hp;
   return r.bolas+' × '+n(r.pbola,0)+' g · '+n(r.hidra,0)+'% · '+n(h,0)+'h · '+
     (r.pre==='nenhum'?'direta':r.pre==='poolish'?'poolish':'biga');};
 
@@ -418,6 +424,9 @@ function vStep3(){
     out+=`<div class="blk"><div class="ov">Massa direta</div>
       ${rows([{k:'Fermentação',v:n(c.horas,0)+'h'},{k:'Massa total',v:g(c.total)+' g'}])}</div>`;
   }
+  if(p.pre!=='nenhum')out+=`<div class="blk"><div class="ov">Tempo total</div>
+    ${rows([{k:(p.pre==='poolish'?'Poolish':'Biga')+' (18 °C)',v:n(c.horasPre,0)+'h'},
+            {k:'Massa final',v:n(c.horas,0)+'h'},{k:'Total',v:n(c.horasReal,0)+'h'}])}</div>`;
   if(p.perda>0)out+=`<div class="dica">Inclui ${n(p.perda,1)}% de margem de perda — ${g(c.total-c.total/(1+p.perda/100))} g acima do peso nominal das bolas.</div>`;
   out+=`<input class="nm" value="${esc(S.nome)}" oninput="A.nome(event)" aria-label="Nome da receita">
     <div class="ac"><button class="ac-b" onclick="A.copiar()">${S.copied?'Copiado':'Copiar ficha'}</button>
@@ -555,7 +564,9 @@ function render(){
   const preName=p.pre==='poolish'?'poolish':'biga';
   const headT = V==='recipe'? S.nome : TITLES[V];
   const headS = V==='recipe'
-    ? n(c.horas,0)+'h · '+(p.pre==='nenhum'?'direta':preName+' '+n(p.prePct,0)+'%')
+    ? (p.pre==='nenhum'
+        ? n(c.horas,0)+'h · direta'
+        : n(c.horasReal,0)+'h · '+preName+' '+n(p.prePct,0)+'% ('+n(c.horasPre,0)+'h + '+n(c.horas,0)+'h)')
     : '';
 
   let body='';
