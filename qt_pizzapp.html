@@ -225,6 +225,12 @@ input:checked~.t-thumb{left:20px;background:#160e00}
       </div>
     </div>
 
+    <div class="field" style="margin-top:14px">
+      <label class="lbl">Margem de perda</label>
+      <div class="inp-wrap"><input type="number" class="inp" id="m-perda" value="3" min="0" max="15" step="0.5" oninput="calcMassa()"><span class="inp-unit">%</span></div>
+      <div class="fbox-info" style="margin-top:6px">Massa extra para compensar o que fica na masseira e na bancada. Zere para massa exata.</div>
+    </div>
+
     <!-- FERMENTO -->
     <div class="fbox" style="margin-top:14px">
       <div class="fbox-title">Fermento</div>
@@ -351,6 +357,7 @@ input:checked~.t-thumb{left:20px;background:#160e00}
     <div id="r-malte-row" class="dl-row" style="display:none"><span class="dl-k">Malte</span><span class="dl-v" id="r-malte">—</span></div>
     <div id="r-oil-row" class="dl-row" style="display:none"><span class="dl-k">Azeite</span><span class="dl-v" id="r-oil">—</span></div>
     <div class="dl-row hl"><span class="dl-k">Massa total</span><span class="dl-v" id="r-total">—</span></div>
+    <div class="dl-row" id="r-perda-row" style="display:none"><span class="dl-k">Margem de perda</span><span class="dl-v" id="r-perda">—</span></div>
     <div class="dl-row"><span class="dl-k">Bolas</span><span class="dl-v" id="r-bolas">—</span></div>
     <div class="dl-row"><span class="dl-k">Peso / bola</span><span class="dl-v" id="r-pbola-out">—</span></div>
     <div class="dl-row"><span class="dl-k">Hidratação real</span><span class="dl-v" id="r-hidra-out">—</span></div>
@@ -839,9 +846,13 @@ function calcMassa(){
   const op=+document.getElementById('m-oil').value||0;
   const tipo=document.getElementById('m-lev-tipo')?.value||'fresco';
   const tmap={'fresco':'Fresco','seco':'Seco Ativo','natural':'Levain'};
+  // margem de perda: massa extra para compensar o que fica na masseira/bancada
+  const perda=+document.getElementById('m-perda')?.value||0;
+  const mf=1+perda/100;
+  const soma=1+h/100+sp/100+lp/100+up/100+op/100;
   let far,bolas;
-  if(isBolas){bolas=+document.getElementById('m-bolas').value||6;far=bolas*pb/(1+h/100+sp/100+lp/100+up/100+op/100);}
-  else{far=+document.getElementById('m-farinha-tot').value||1000;bolas=Math.round(far*(1+h/100+sp/100+lp/100+up/100+op/100)/pb*10)/10;}
+  if(isBolas){bolas=+document.getElementById('m-bolas').value||6;far=bolas*pb*mf/soma;}
+  else{far=+document.getElementById('m-farinha-tot').value||1000;bolas=Math.round(far*soma/(pb*mf)*10)/10;}
   curFar=far;
   const ag=far*h/100,sa=far*sp/100,le=far*lp/100,su=far*up/100,oi=far*op/100,tot=far+ag+sa+le+su+oi;
   const f=v=>v>=100?v.toFixed(0)+'g':v>=10?v.toFixed(1)+'g':v.toFixed(2)+'g';
@@ -849,6 +860,12 @@ function calcMassa(){
   set('r-lev-label',tmap[tipo]||'Fermento');
   set('r-total',f(tot));set('r-bolas',isBolas?bolas+' un':bolas.toFixed(1)+' un');
   set('r-pbola-out',pb+'g');set('r-hidra-out',h.toFixed(1)+'%');
+  // mostra quanto da massa é margem de perda (nunca deixa a margem invisível)
+  const pr=document.getElementById('r-perda-row');
+  if(pr){
+    pr.style.display=perda>0?'flex':'none';
+    if(perda>0) set('r-perda',perda.toFixed(1)+'% · +'+f(tot-tot/mf));
+  }
   const mr=document.getElementById('r-malte-row'),or=document.getElementById('r-oil-row');
   mr.style.display=up>0?'flex':'none';if(up>0)set('r-malte',f(su));
   or.style.display=op>0?'flex':'none';if(op>0)set('r-oil',f(oi));
@@ -1233,6 +1250,7 @@ function copyResultado(){
   if(vis('r-oil-row'))   L.push('Azeite: '+txt('r-oil'));
   L.push(txt('r-lev-label')+' ('+tipoFull+'): '+txt('r-lev'));
   L.push('Massa total: '+txt('r-total'));
+  if(vis('r-perda-row')) L.push('Margem de perda: '+txt('r-perda'));
   L.push('Bolas: '+txt('r-bolas')+'  ·  '+txt('r-pbola-out')+'/bola');
   L.push('');
   L.push('FERMENTAÇÃO — '+txt('m-tempo-total')+' total');
@@ -1273,7 +1291,7 @@ function fallbackCopy(text,cb){
 // ── PERSISTÊNCIA (localStorage) ──
 const LS_KEY='qtpizzapp_state_v1';
 const PERSIST_IDS=[
-  'm-mode','m-bolas','m-farinha-tot','m-pbola','m-hidra','m-sal','m-sugar','m-oil',
+  'm-mode','m-bolas','m-farinha-tot','m-pbola','m-hidra','m-sal','m-sugar','m-oil','m-perda',
   'm-lev-tipo','m-pre-ferm','m-pre-pct','m-poolish-h','m-temp-amb','m-h-amb','m-temp-ctrl','m-h-ctrl',
   'm-lev','b-lev-r','w-mode','w-unica','bass-hidra-base','bass-hidra-final',
   'esc-orig','esc-dest','cv-c','cv-f','cv-ferm','cv-hf','cv-ha','cv-hpct',
