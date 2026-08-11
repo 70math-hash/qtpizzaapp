@@ -730,16 +730,19 @@ const poolishPct = h => POOLISH_A * Math.exp(-POOLISH_K * Math.max(1, Math.min(2
 // Biga: fermento FIXO de 1,0% sobre a farinha da biga, independente das horas
 // (medido no PizzApp com biga de 28% e 29% — 1,000% nos dois casos).
 const BIGA_PCT = 1.0;
-// Com pré-fermento o total de fermento da receita cai para metade da dose direta.
-// Medido no PizzApp em 4 cenários (poolish 8h/12h/18h e biga 28%/29%): 0,499–0,500.
-// ATENÇÃO: este fator está sob revisão — ver pesquisa sobre a validade do 0,5.
-const PRE_FATOR = 0.50;
-// O PizzApp alerta risco quando o pré-fermento carrega mais de 75% do fermento total.
-const PRE_RISCO = 0.75;
+// MODELO DE REDISTRIBUIÇÃO (não de redução).
+// O PizzApp usa metade da dose direta quando há pré-fermento, mas nenhuma fonte
+// autorizada sustenta esse fator: Giorilli, Simona Lauri, Hamelman (via King Arthur/BBGA),
+// Modernist Bread, Baker's Journal e PizzaBlab descrevem sempre a mesma mecânica —
+// calcula-se o fermento total do protocolo e SUBTRAI-SE o que já está no pré-fermento.
+// A "economia de fermento" da literatura italiana refere-se ao rinfresco, não ao total:
+// "nell'utilizzo nell'impasto successivo [...] di una minore percentuale di lievito
+// compresso rispetto alla lavorazione diretta" (Lauri).
+// Portanto: total = dose direta; o refresco completa o que o pré-fermento não supre.
 
 // Versão do modelo de fermento. Ao mudar a fórmula, incremente este número:
 // doses salvas por versões anteriores são descartadas e recalculadas.
-const FERM_MODEL_VERSION = 4;
+const FERM_MODEL_VERSION = 5;
 // Divisão do fermento entre pré-fermento e refresco (% sobre a farinha TOTAL)
 let fermSplit = {pre:0, refresco:0};
 let curFar = 0;         // farinha total corrente (compartilhada entre cálculos)
@@ -800,29 +803,33 @@ function calcFermentoAuto(write=true){
   let pctFresco = direta, prePctFerm = 0, refPctFerm = 0;
   if(hasPre){
     const prePct  = (+document.getElementById('m-pre-pct')?.value || 50) / 100; // fração da farinha
-    const alvo    = direta * PRE_FATOR;   // total de fermento com pré-fermento
     // Biga e poolish seguem a MESMA regra: o pré-fermento tem sua própria dose
-    // (fixa na biga, por horas no poolish) e o refresco completa o que faltar.
+    // (fixa na biga, por horas no poolish) e o refresco completa até a dose direta.
     const dosePre = isPoolish
       ? poolishPct(+document.getElementById('m-poolish-h')?.value || 12)
       : BIGA_PCT;
-    prePctFerm = prePct * dosePre;          // convertido para a farinha TOTAL
-    refPctFerm = Math.max(0, alvo - prePctFerm);
-    pctFresco  = prePctFerm + refPctFerm;   // = max(alvo, fermento do pré-fermento)
+    prePctFerm = prePct * dosePre;              // convertido para a farinha TOTAL
+    refPctFerm = Math.max(0, direta - prePctFerm);
+    pctFresco  = prePctFerm + refPctFerm;       // = max(direta, fermento do pré-fermento)
     if(isPoolish){
       const el = document.getElementById('poolish-info');
       if(el) el.textContent = `${dosePre.toFixed(2)}% de fermento sobre a farinha do poolish. `
-        + (refPctFerm > 0 ? 'O refresco completa o restante.' : 'O poolish já supre toda a receita — refresco sem fermento.');
+        + (refPctFerm > 0 ? 'O refresco completa até a dose do protocolo.' : 'O poolish sozinho já passa da dose do protocolo.');
     }
-    // aviso de risco: pré-fermento carregando fermento demais do total
+    // Aviso quando o pré-fermento SOZINHO já excede o fermento que o protocolo pede.
+    // É o caso-limite documentado pelo PizzaBlab ("the yeast required for the preferment
+    // may actually meet or exceed the total yeast needed"). Condição calculada, não
+    // heurística: a dose fixa da biga não conhece o tempo/temperatura da fermentação.
     const av = document.getElementById('pre-risco');
     if(av){
-      const frac = pctFresco > 0 ? prePctFerm / pctFresco : 0;
-      const risco = frac > PRE_RISCO;
+      const excesso = direta > 0 ? prePctFerm / direta : 0;
+      const risco = excesso > 1.15;
       av.style.display = risco ? 'block' : 'none';
-      if(risco) av.textContent = `⚠️ O ${isPoolish?'poolish':'a biga'} carrega ${(frac*100).toFixed(0)}% do fermento da receita. `
-        + `Acima de ${PRE_RISCO*100}% há risco de fermentação excessiva — reduza a % de farinha no pré-fermento`
-        + (isPoolish ? ' ou aumente as horas de poolish.' : '.');
+      if(risco) av.textContent = `⚠️ ${isPoolish?'O poolish':'A biga'} sozinh${isPoolish?'o':'a'} traz `
+        + `${excesso.toFixed(1)}× o fermento que este protocolo de ${(hAmb+hCtrl).toFixed(0)}h pede `
+        + `(${prePctFerm.toFixed(3)}% contra ${direta.toFixed(3)}%). `
+        + `A dose de ${isPoolish?'poolish':'biga'} pressupõe fermentação final curta — com retardo longo, `
+        + `reduza a % de farinha no pré-fermento${isPoolish?' ou aumente as horas de poolish':''}.`;
     }
   }else{
     const av = document.getElementById('pre-risco'); if(av) av.style.display='none';
