@@ -553,12 +553,27 @@ function render(){
       <button class="ft-x" onclick="A.next()">Próximo →</button></div></div>`;
   }
 
+  // O render reconstrói a tela inteira, o que zeraria a rolagem a cada toque
+  // no − / +. Guarda a posição antes e devolve depois; quem quer voltar ao topo
+  // (troca de tela ou de passo) zera explicitamente após chamar render().
+  const antes=document.querySelector('.ct');
+  const scroll=antes?antes.scrollTop:0;
+  // preserva também o foco e o cursor do campo de nome enquanto se digita
+  const foco=document.activeElement;
+  const eraNome=foco&&foco.classList&&foco.classList.contains('nm');
+  const selIni=eraNome?foco.selectionStart:0, selFim=eraNome?foco.selectionEnd:0;
+
   document.getElementById('app').innerHTML=
     `<header class="hd">
        ${V==='lib'?'<div style="width:36px;flex:none"></div>':`<button class="hd-btn" onclick="A.back()" aria-label="voltar">←</button>`}
        <div class="hd-mid">${headT?`<div class="hd-t">${esc(headT)}</div>`:''}${headS?`<div class="hd-s">${headS}</div>`:''}</div>
        <button class="hd-th" onclick="A.theme()" aria-label="tema">${S.dark?'CLA':'ESC'}</button>
      </header>${steps}<main class="ct">${body}</main>${footer}`;
+
+  const agora=document.querySelector('.ct');
+  if(agora&&scroll)agora.scrollTop=scroll;
+  if(eraNome){const nm=document.querySelector('.nm');
+    if(nm){nm.focus();try{nm.setSelectionRange(selIni,selFim);}catch(e){}}}
 }
 
 /* ── INIT ── */
