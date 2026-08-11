@@ -253,6 +253,12 @@ input:checked~.t-thumb{left:20px;background:#160e00}
         <label class="lbl">% da farinha no pré-fermento</label>
         <div class="inp-wrap"><input type="number" class="inp" id="m-pre-pct" value="50" min="10" max="90" step="5" oninput="calcFermentoAuto()"><span class="inp-unit">%</span></div>
       </div>
+      <!-- horas do poolish (só poolish) — tabela calibrada a 18 °C -->
+      <div id="poolish-h-wrap" style="display:none;margin-bottom:10px">
+        <label class="lbl">Fermentação do poolish (a 18 °C)</label>
+        <div class="inp-wrap"><input type="number" class="inp" id="m-poolish-h" value="12" min="1" max="24" step="1" oninput="calcFermentoAuto()"><span class="inp-unit">h</span></div>
+        <div class="fbox-info" id="poolish-info" style="margin-top:6px"></div>
+      </div>
 
       <!-- PROTOCOLO DE FERMENTAÇÃO -->
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px">
@@ -709,9 +715,19 @@ function getTempoTotal(){
 const FERM_A = 7.327;   // constante de calibração (fresco, % da farinha)
 const FERM_P = 1.4534;  // expoente do tempo/atividade (lei de potência)
 const FERM_Q = 1.1365;  // fator de taxa por °C
+// ── PRÉ-FERMENTO (calibrado nos dados do PizzApp 1.9) ──
+// Poolish a 18°C: fermento fresco sobre a FARINHA DO POOLISH, erro máx. 0,5%.
+const POOLISH_A = 3.9108, POOLISH_K = 0.23089;
+const poolishPct = h => POOLISH_A * Math.exp(-POOLISH_K * Math.max(1, Math.min(24, h)));
+// Com pré-fermento o total de fermento da receita cai para metade da dose direta
+// (0,4986 medido no PizzApp em 8h, 12h e 18h de poolish).
+const PRE_FATOR = 0.50;
+
 // Versão do modelo de fermento. Ao mudar a fórmula, incremente este número:
 // doses salvas por versões anteriores são descartadas e recalculadas.
-const FERM_MODEL_VERSION = 2;
+const FERM_MODEL_VERSION = 3;
+// Divisão do fermento entre pré-fermento e refresco (% sobre a farinha TOTAL)
+let fermSplit = {pre:0, refresco:0};
 let curFar = 0;         // farinha total corrente (compartilhada entre cálculos)
 let levManual = false;  // true quando o usuário digita a dose à mão
 
@@ -742,12 +758,12 @@ function calcFermentoAuto(write=true){
 
   // mostra/oculta campos de pré-fermento
   const hasPre = preFerm !== 'nenhum';
-  document.getElementById('pre-pct-wrap').style.display = hasPre ? 'block' : 'none';
-  // Na BIGA todo o fermento vai no pré-fermento — o refresco não leva fermento.
-  // O campo de fermento extra só faz sentido no poolish.
-  const permiteRefresco = preFerm === 'poolish';
-  document.getElementById('m-lev-refresco-wrap').style.display = permiteRefresco ? 'block' : 'none';
-  if(!permiteRefresco){ const lr=document.getElementById('b-lev-r'); if(lr) lr.value = 0; }
+  const isPoolish = preFerm === 'poolish';
+  document.getElementById('pre-pct-wrap').style.display   = hasPre ? 'block' : 'none';
+  document.getElementById('poolish-h-wrap').style.display = isPoolish ? 'block' : 'none';
+  // O fermento do refresco é calculado, não digitado: no poolish ele completa o
+  // que faltar para o alvo; na biga é sempre zero (todo o fermento vai na biga).
+  document.getElementById('m-lev-refresco-wrap').style.display = 'none';
 
   set('m-tempo-total', hTotal.toFixed(1)+'h');
 
@@ -762,14 +778,34 @@ function calcFermentoAuto(write=true){
   const ativ_ctrl = useCtrl && hCtrl > 0 ? fermRate(tCtrl) * hCtrl : 0;
   const E = ativ_amb + ativ_ctrl;
 
-  let pctFresco = E > 0 ? FERM_A * Math.pow(E, -FERM_P) : 3.0;
+  let direta = E > 0 ? FERM_A * Math.pow(E, -FERM_P) : 3.0;
   // clamp: mínimo 0.005%, máximo 5%
-  pctFresco = Math.max(0.005, Math.min(5.0, pctFresco));
+  direta = Math.max(0.005, Math.min(5.0, direta));
 
-  // Pré-fermento reduz ~45% da dose (parte da atividade vem da biga)
-  if(hasPre) pctFresco = pctFresco * 0.55;
+  // ── Divisão pré-fermento / refresco (tudo em % sobre a farinha TOTAL) ──
+  let pctFresco = direta, prePctFerm = 0, refPctFerm = 0;
+  if(hasPre){
+    const prePct  = (+document.getElementById('m-pre-pct')?.value || 50) / 100; // fração da farinha
+    const alvo    = direta * PRE_FATOR;   // total de fermento com pré-fermento
+    if(isPoolish){
+      const hP = +document.getElementById('m-poolish-h')?.value || 12;
+      // tabela do poolish é sobre a farinha DO POOLISH → converte para a farinha total
+      prePctFerm = prePct * poolishPct(hP);
+      refPctFerm = Math.max(0, alvo - prePctFerm);
+      pctFresco  = prePctFerm + refPctFerm;   // = max(alvo, fermento do poolish)
+      const el = document.getElementById('poolish-info');
+      if(el) el.textContent = `${poolishPct(hP).toFixed(2)}% de fermento sobre a farinha do poolish. `
+        + (refPctFerm > 0 ? 'O refresco completa o restante.' : 'O poolish já supre toda a receita — refresco sem fermento.');
+    } else {
+      // biga: todo o fermento vai no pré-fermento, refresco sem fermento
+      prePctFerm = alvo; refPctFerm = 0; pctFresco = alvo;
+    }
+  }
 
+  // converte o tipo de fermento mantendo a proporção da divisão
   const pctFinal = converterFermento(pctFresco, tipo);
+  const fator    = pctFresco > 0 ? pctFinal / pctFresco : 0;
+  fermSplit = {pre: prePctFerm * fator, refresco: refPctFerm * fator};
 
   // Mensagem informativa
   const msgs = [];
@@ -848,12 +884,14 @@ function calcBiga(){
   const op=+document.getElementById('m-oil').value/100||0;   // azeite
   const pct=+document.getElementById('m-pre-pct')?.value/100||0.5;
   const HP=tipo==='biga'?0.45:1.0; // biga=45% fixo QT, poolish=100%
-  const lb=+document.getElementById('m-lev').value/100||0;   // dose principal → vai no pré-fermento
-  const lr=+document.getElementById('b-lev-r')?.value/100||0;// fermento extra no refresco
+  // divisão calculada em calcFermentoAuto (% sobre a farinha total → fração)
+  const lb=(fermSplit.pre||0)/100;      // fermento do pré-fermento
+  const lr=(fermSplit.refresco||0)/100; // fermento do refresco (0 na biga)
   const tipoName=({fresco:'Fresco',seco:'Seco Ativo',natural:'Levain'})[document.getElementById('m-lev-tipo')?.value]||'Fermento';
 
-  // pré-fermento: farinha × pct, água pela hidra do pré-fermento, fermento (dose principal)
-  const fb=ft*pct, ab=fb*HP, levb=fb*lb, preT=fb+ab+levb;
+  // pré-fermento: farinha × pct, água pela hidra do pré-fermento.
+  // lb/lr já são % sobre a farinha TOTAL, então ambos multiplicam ft.
+  const fb=ft*pct, ab=fb*HP, levb=ft*lb, preT=fb+ab+levb;
   // refresco / impasto finale: farinha, água, sal, malte, azeite e fermento extra remanescentes
   const fr=ft-fb, at=ft*ht, ar=at-ab, sal=ft*sp, su=ft*up, oi=ft*op, levr=ft*lr;
   const mT=preT+fr+ar+sal+su+oi+levr;
@@ -1236,7 +1274,7 @@ function fallbackCopy(text,cb){
 const LS_KEY='qtpizzapp_state_v1';
 const PERSIST_IDS=[
   'm-mode','m-bolas','m-farinha-tot','m-pbola','m-hidra','m-sal','m-sugar','m-oil',
-  'm-lev-tipo','m-pre-ferm','m-pre-pct','m-temp-amb','m-h-amb','m-temp-ctrl','m-h-ctrl',
+  'm-lev-tipo','m-pre-ferm','m-pre-pct','m-poolish-h','m-temp-amb','m-h-amb','m-temp-ctrl','m-h-ctrl',
   'm-lev','b-lev-r','w-mode','w-unica','bass-hidra-base','bass-hidra-final',
   'esc-orig','esc-dest','cv-c','cv-f','cv-ferm','cv-hf','cv-ha','cv-hpct',
   'cv-sal-f','cv-sal-pct','f-estilo','f-temp','f-tipo'
@@ -1275,9 +1313,10 @@ function applyPanelVisibility(){
   show('temp-amb-wrap',  document.getElementById('tog-amb')?.checked);
   show('temp-ctrl-wrap', document.getElementById('tog-ctrl')?.checked);
   show('bassinage-panel',document.getElementById('tog-bassinage')?.checked);
-  const hasPre=(document.getElementById('m-pre-ferm')?.value||'nenhum')!=='nenhum';
-  show('pre-pct-wrap',hasPre);
-  show('m-lev-refresco-wrap',hasPre);
+  const pre=document.getElementById('m-pre-ferm')?.value||'nenhum';
+  show('pre-pct-wrap',pre!=='nenhum');
+  show('poolish-h-wrap',pre==='poolish');
+  show('m-lev-refresco-wrap',false);
 }
 
 // ── INIT ──
