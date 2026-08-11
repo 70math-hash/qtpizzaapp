@@ -314,7 +314,7 @@ input:checked~.t-thumb{left:20px;background:#160e00}
       <!-- dose -->
       <label class="lbl">Dose calculada (%)</label>
       <div class="fbox-input-row">
-        <div class="inp-wrap"><input type="number" class="inp" id="m-lev" value="0.08" step="0.001" oninput="calcMassa()"><span class="inp-unit">%</span></div>
+        <div class="inp-wrap"><input type="number" class="inp" id="m-lev" value="0.08" step="0.001" oninput="levManual=true;calcMassa()"><span class="inp-unit">%</span></div>
         <button class="btn-auto" onclick="calcFermentoAuto()">Auto</button>
       </div>
       <div class="fbox-info" id="m-lev-info"></div>
@@ -363,6 +363,7 @@ input:checked~.t-thumb{left:20px;background:#160e00}
       <div class="dl-row"><span class="dl-k">Água remanescente</span><span class="dl-v" id="b-ref-agua">—</span></div>
       <div class="dl-row"><span class="dl-k">Sal</span><span class="dl-v" id="b-ref-sal">—</span></div>
       <div class="dl-row" id="b-ref-lev-r" style="display:none"><span class="dl-k">Fermento extra refresco</span><span class="dl-v" id="b-ref-lev">—</span></div>
+      <div class="dl-row" id="b-ref-sem-lev"><span class="dl-k">Fermento</span><span class="dl-v" style="color:var(--muted)">sem fermento</span></div>
       <div class="dl-row" id="b-ref-malte-row" style="display:none"><span class="dl-k">Malte</span><span class="dl-v" id="b-ref-malte">—</span></div>
       <div class="dl-row" id="b-ref-oil-row" style="display:none"><span class="dl-k">Azeite</span><span class="dl-v" id="b-ref-oil">—</span></div>
       <div class="dl-row hl"><span class="dl-k">Massa total c/ pré-ferm.</span><span class="dl-v" id="b-total">—</span></div>
@@ -708,7 +709,11 @@ function getTempoTotal(){
 const FERM_A = 7.327;   // constante de calibração (fresco, % da farinha)
 const FERM_P = 1.4534;  // expoente do tempo/atividade (lei de potência)
 const FERM_Q = 1.1365;  // fator de taxa por °C
+// Versão do modelo de fermento. Ao mudar a fórmula, incremente este número:
+// doses salvas por versões anteriores são descartadas e recalculadas.
+const FERM_MODEL_VERSION = 2;
 let curFar = 0;         // farinha total corrente (compartilhada entre cálculos)
+let levManual = false;  // true quando o usuário digita a dose à mão
 
 // taxa de fermentação relativa a 20°C, em função da temperatura (°C)
 function fermRate(temp){
@@ -737,8 +742,12 @@ function calcFermentoAuto(write=true){
 
   // mostra/oculta campos de pré-fermento
   const hasPre = preFerm !== 'nenhum';
-  document.getElementById('pre-pct-wrap').style.display       = hasPre ? 'block' : 'none';
-  document.getElementById('m-lev-refresco-wrap').style.display = hasPre ? 'block' : 'none';
+  document.getElementById('pre-pct-wrap').style.display = hasPre ? 'block' : 'none';
+  // Na BIGA todo o fermento vai no pré-fermento — o refresco não leva fermento.
+  // O campo de fermento extra só faz sentido no poolish.
+  const permiteRefresco = preFerm === 'poolish';
+  document.getElementById('m-lev-refresco-wrap').style.display = permiteRefresco ? 'block' : 'none';
+  if(!permiteRefresco){ const lr=document.getElementById('b-lev-r'); if(lr) lr.value = 0; }
 
   set('m-tempo-total', hTotal.toFixed(1)+'h');
 
@@ -776,7 +785,7 @@ function calcFermentoAuto(write=true){
 
   if(hasPre) info += ' Dose reduzida — atividade complementada pelo pré-fermento.';
 
-  if(write) document.getElementById('m-lev').value = pctFinal;
+  if(write){ document.getElementById('m-lev').value = pctFinal; levManual = false; }
   document.getElementById('m-lev-info').textContent = info;
   calcMassa();
 }
@@ -856,6 +865,9 @@ function calcBiga(){
   set('b-ref-farinha',f(fr));set('b-ref-agua',f(ar));set('b-ref-sal',f(sal));
   set('b-ref-lev',f(levr));set('b-total',f(mT));
   document.getElementById('b-ref-lev-r').style.display=lr>0?'flex':'none';
+  // deixa explícito que o refresco não leva fermento (padrão da biga)
+  const semLev=document.getElementById('b-ref-sem-lev');
+  if(semLev) semLev.style.display = lr>0 ? 'none' : 'flex';
   const brm=document.getElementById('b-ref-malte-row'),bro=document.getElementById('b-ref-oil-row');
   brm.style.display=up>0?'flex':'none';if(up>0)set('b-ref-malte',f(su));
   bro.style.display=op>0?'flex':'none';if(op>0)set('b-ref-oil',f(oi));
@@ -863,10 +875,11 @@ function calcBiga(){
   set('b-info-hidra',(ft>0?(at/ft)*100:0).toFixed(2)+'%');
   document.getElementById('r-preferm-block').style.display='block';
 
-  // Card principal: quando há pré-fermento, o fermento exibido é o do REFRESCO (não o total).
-  // O fermento do pré-fermento aparece no bloco Biga/Poolish acima. Massa total unificada.
-  set('r-lev',f(levr));
-  set('r-lev-label','Ferm. refresco');
+  // Card principal: com pré-fermento o fermento exibido é o TOTAL da receita.
+  // Na biga esse total está inteiro no pré-fermento (refresco sem fermento);
+  // no poolish pode haver fermento extra no refresco. O bloco acima detalha.
+  set('r-lev', f(levb + levr));
+  set('r-lev-label', levr > 0 ? 'Ferm. total' : (tipo==='biga' ? 'Ferm. na biga' : 'Ferm. no poolish'));
   set('r-total',f(mT));
 }
 
@@ -1233,12 +1246,17 @@ let _restoring=false;
 function saveState(){
   if(_restoring)return;
   try{
-    const data={fields:{},checks:{},blend:blendRows,esc:escIngs};
+    const data={fields:{},checks:{},blend:blendRows,esc:escIngs,
+                fermModel:FERM_MODEL_VERSION, levManual:levManual};
     PERSIST_IDS.forEach(id=>{const el=document.getElementById(id);if(el)data.fields[id]=el.value;});
     PERSIST_CHECKS.forEach(id=>{const el=document.getElementById(id);if(el)data.checks[id]=el.checked;});
     localStorage.setItem(LS_KEY,JSON.stringify(data));
   }catch(e){}
 }
+// Restaura o estado. Devolve true se a DOSE salva pode ser mantida —
+// só quando o usuário a digitou à mão E veio da mesma versão do modelo.
+// Caso contrário a dose é recalculada, para que uma mudança de fórmula
+// nunca fique "presa" no aparelho de quem já usou o app.
 function loadState(){
   try{
     const raw=localStorage.getItem(LS_KEY);if(!raw)return false;
@@ -1247,7 +1265,9 @@ function loadState(){
     if(Array.isArray(data.esc)&&data.esc.length)     escIngs =data.esc.map(r=>({nome:r.nome!=null?r.nome:'',g:+r.g||0}));
     if(data.fields) Object.keys(data.fields).forEach(id=>{const el=document.getElementById(id);if(el)el.value=data.fields[id];});
     if(data.checks) Object.keys(data.checks).forEach(id=>{const el=document.getElementById(id);if(el)el.checked=!!data.checks[id];});
-    return true;
+    const mesmoModelo = data.fermModel === FERM_MODEL_VERSION;
+    levManual = mesmoModelo && !!data.levManual;
+    return levManual;
   }catch(e){return false;}
 }
 function applyPanelVisibility(){
@@ -1263,12 +1283,12 @@ function applyPanelVisibility(){
 // ── INIT ──
 document.addEventListener('DOMContentLoaded',()=>{
   _restoring=true;
-  const restored=loadState();
+  const manterDose=loadState();
   applyPanelVisibility();
   renderBlendRows();
   renderEsc();
-  // Se restaurado, preservar a dose salva (não sobrescrever com Auto)
-  calcFermentoAuto(!restored);
+  // Recalcula a dose, exceto quando o usuário a digitou à mão na mesma versão do modelo
+  calcFermentoAuto(!manterDose);
   calcW();
   if(document.getElementById('tog-bassinage')?.checked) calcBassinage();
   cvFerm();cvSal();
