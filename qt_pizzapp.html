@@ -698,37 +698,22 @@ function getTempoTotal(){
   return hAmb+hCtrl;
 }
 
-// ── FERMENTO — FÓRMULA DE ADROVER (mesma base do PizzApp) ──
-// L = C × e^(-K(T) × h)
-// C = 0.027 (constante empírica de calibração do PizzApp)
-// K = constante cinética por temperatura (°C)
-// Para múltiplas fases: L = C × e^(-[K1×h1 + K2×h2 + ...])
-// i.e. soma os expoentes de cada fase e aplica a exponencial uma vez só.
+// ── FERMENTO — MODELO PIZZAPP (calibrado por engenharia reversa) ──
+// Ajustado a 15 pontos reais do PizzApp 1.9 (fermento fresco), erro máx. 0,3%.
+//   fermento%(fresco) = A × E^(-P)
+//   E = Σ taxa(T)·h        (atividade acumulada, soma das fases)
+//   taxa(T) = Q^(T-20)      (rate relativo; dobra a cada ~5,4°C, Q10≈3,6)
+// Depois: ÷3 → seco ativo · ×10 → levain 100% (mesma convenção do app).
 
-const ADROVER_C = 0.027; // constante de calibração fermento fresco
-let curFar = 0;          // farinha total corrente (compartilhada entre cálculos)
+const FERM_A = 7.327;   // constante de calibração (fresco, % da farinha)
+const FERM_P = 1.4534;  // expoente do tempo/atividade (lei de potência)
+const FERM_Q = 1.1365;  // fator de taxa por °C
+let curFar = 0;         // farinha total corrente (compartilhada entre cálculos)
 
-// K por temperatura (°C) — interpolação linear entre pontos do PizzApp
-const K_TABLE = {
-  2:0.0077, 4:0.0099, 6:0.0124, 8:0.0155,
-  10:0.0193,12:0.0237,14:0.0292,16:0.0360,
-  18:0.0445,20:0.0544,22:0.0667,24:0.0815,
-  26:0.0994,28:0.1208,30:0.1461,32:0.1768
-};
-
-function getK(temp){
-  // clamp
-  temp = Math.max(2, Math.min(32, temp));
-  // interpolação linear entre os dois pontos mais próximos
-  const keys = Object.keys(K_TABLE).map(Number).sort((a,b)=>a-b);
-  for(let i=0;i<keys.length-1;i++){
-    const t0=keys[i], t1=keys[i+1];
-    if(temp>=t0 && temp<=t1){
-      const r=(temp-t0)/(t1-t0);
-      return K_TABLE[t0]+(K_TABLE[t1]-K_TABLE[t0])*r;
-    }
-  }
-  return K_TABLE[32];
+// taxa de fermentação relativa a 20°C, em função da temperatura (°C)
+function fermRate(temp){
+  temp = Math.max(2, Math.min(35, temp));
+  return Math.pow(FERM_Q, temp - 20);
 }
 
 // Converte fermento fresco para outros tipos
@@ -737,6 +722,7 @@ function converterFermento(pctFresco, tipo){
   if(tipo==='natural') return +(pctFresco*10).toPrecision(3); // levain ativo 100%
   return +pctFresco.toPrecision(3);
 }
+
 
 function calcFermentoAuto(write=true){
   const tipo      = document.getElementById('m-lev-tipo')?.value||'fresco';
@@ -762,14 +748,14 @@ function calcFermentoAuto(write=true){
     return;
   }
 
-  // FÓRMULA DE ADROVER — soma dos expoentes por fase
-  const exp_amb  = useAmb  && hAmb  > 0 ? getK(tAmb)  * hAmb  : 0;
-  const exp_ctrl = useCtrl && hCtrl > 0 ? getK(tCtrl) * hCtrl : 0;
-  const expoente = exp_amb + exp_ctrl;
+  // MODELO PIZZAPP — atividade acumulada + lei de potência
+  const ativ_amb  = useAmb  && hAmb  > 0 ? fermRate(tAmb)  * hAmb  : 0;
+  const ativ_ctrl = useCtrl && hCtrl > 0 ? fermRate(tCtrl) * hCtrl : 0;
+  const E = ativ_amb + ativ_ctrl;
 
-  let pctFresco = ADROVER_C * Math.exp(-expoente);
-  // clamp: mínimo 0.005%, máximo 3%
-  pctFresco = Math.max(0.005, Math.min(3.0, pctFresco));
+  let pctFresco = E > 0 ? FERM_A * Math.pow(E, -FERM_P) : 3.0;
+  // clamp: mínimo 0.005%, máximo 5%
+  pctFresco = Math.max(0.005, Math.min(5.0, pctFresco));
 
   // Pré-fermento reduz ~45% da dose (parte da atividade vem da biga)
   if(hasPre) pctFresco = pctFresco * 0.55;
