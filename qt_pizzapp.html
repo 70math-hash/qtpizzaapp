@@ -145,6 +145,12 @@ const BIGA_PCT=1.0;
 // Maturação da biga: 18h a 18°C (Giorilli documenta 18/24h). O poolish tem
 // campo próprio de horas. Usada só para exibir o tempo real da receita.
 const BIGA_H=18;
+// Crédito fermentativo do pré-fermento maduro: a população de levedura
+// multiplica durante a maturação, então o pré vale mais que o fermento nominal.
+// Fator empírico calibrado para reproduzir a prática documentada (Zaghini/
+// Consultapizza: biga 20-40% + massa final 4-6h → rinfresco zero; teto de
+// 0,1% de starter em massas finais longas).
+const PRE_CREDIT=2;
 const LS='qtpizzapp_v2';
 
 const rate=t=>Math.pow(FERM_Q,Math.max(2,Math.min(35,t))-20);
@@ -178,13 +184,13 @@ function calc(){
   let direta = E>0 ? FERM_A*Math.pow(E,-FERM_P) : 5;
   direta = Math.max(0.005, Math.min(5, direta));
 
-  // Redistribuição (não redução): o total é a dose direta; o pré-fermento tem
-  // sua própria dose e o refresco completa o que faltar.
+  // O pré-fermento tem sua própria dose; o refresco completa só o que a
+  // maturação não cobre, creditando o pré maduro a PRE_CREDIT × o nominal.
   let prePctF=0, refPctF=0, totalPct=direta, dosePre=0;
   if(p.pre!=='nenhum'){
     dosePre = p.pre==='poolish' ? poolishPct(p.poolishH) : BIGA_PCT;
     prePctF = (p.prePct/100)*dosePre;
-    refPctF = Math.max(0, direta - prePctF);
+    refPctF = Math.max(0, direta - PRE_CREDIT*prePctF);
     totalPct = prePctF + refPctF;
   }
   // conversão de tipo mantendo a proporção da divisão
@@ -206,7 +212,7 @@ function calc(){
   return {far,agua,salg,levg,maltg,azg,lev,total,horas:p.hAmb+p.hCtrl,
     horasPre, horasReal:horasPre+p.hAmb+p.hCtrl,
     fb,ab,levb,fr:far-fb,ar:agua-ab,levr,direta,dosePre,prePctF,
-    excesso: direta>0 ? prePctF/direta : 0};
+    excesso: direta>0 ? PRE_CREDIT*prePctF/direta : 0};
 }
 
 /* ── FORMATAÇÃO pt-BR ── */
@@ -382,8 +388,8 @@ function vStep2(){
     if(p.pre==='poolish')
       extra+=stepper('Fermentação do poolish (18 °C)',n(p.poolishH,1),'h',"A.setP('poolishH',-0.5,1,24)","A.setP('poolishH',0.5,1,24)",0,['p.poolishH',1,24,1]);
     extra+=`<div class="dica">${n(c.dosePre,2)}% de fermento sobre a farinha ${p.pre==='poolish'?'do poolish':'da biga'}.
-      ${c.levr>0.0001?'O impasto finale completa até a dose do protocolo.':'O pré-fermento sozinho já supre a receita — impasto finale sem fermento.'}</div>`;
-    if(c.excesso>1.15) extra+=`<div class="warn">${preName} sozinh${p.pre==='poolish'?'o':'a'} traz ${n(c.excesso,1)}× o fermento
+      ${c.levr>0.0001?'O impasto finale completa o que a maturação não cobre.':'O pré-fermento maduro sozinho já supre a receita — impasto finale sem fermento.'}</div>`;
+    if(c.excesso>1.15) extra+=`<div class="warn">${preName} madur${p.pre==='poolish'?'o':'a'} equivale a ${n(c.excesso,1)}× o fermento
       que este protocolo de ${n(c.horas,0)}h pede. A dose de ${preName.toLowerCase()} pressupõe fermentação final curta —
       com retardo longo, reduza a % de farinha${p.pre==='poolish'?' ou aumente as horas':''}.</div>`;
   }
