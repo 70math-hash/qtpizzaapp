@@ -153,6 +153,17 @@ const BIGA_H=18;
 const PRE_CREDIT=2;
 const LS='qtpizzapp_v2';
 
+// ── Nuvem (Supabase) ──
+// Chave publicável: própria para uso no navegador; o acesso é limitado por RLS
+// à tabela de receitas do PizzApp.
+const SB_URL='https://helinoirdizwrluydkzp.supabase.co/rest/v1/pizzapp_receitas';
+const SB_KEY='sb_publishable_ZTaUCZHHk57mDiGEjNyKLg_8qYNFvUg';
+const SB_HEAD={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json'};
+// Identidade do aparelho: gerada uma vez, vive no localStorage.
+let DEV='';
+try{DEV=localStorage.getItem('qtpizzapp_dev')||'';
+  if(!DEV){DEV=crypto.randomUUID();localStorage.setItem('qtpizzapp_dev',DEV);}}catch(e){DEV=crypto.randomUUID();}
+
 const rate=t=>Math.pow(FERM_Q,Math.max(2,Math.min(35,t))-20);
 const poolishPct=h=>POOLISH_A*Math.exp(-POOLISH_K*Math.max(1,Math.min(24,h)));
 
@@ -168,6 +179,7 @@ const FORNO={
 const FTIPO={lenha:['Lenha','Recuperação rápida, perfil aromático superior.'],gas:['Gás','Temperatura estável ao longo do serviço.'],eletrico:['Elétrico','Controle preciso de topo e sola.'],combinado:['Combi','Configure topo e sola separadamente.']};
 
 let S={view:'lib',step:0,dark:false,nome:'Nova receita',p:{...DEFAULT},recipes:[],
+  aluno:'',turma:'',pendDel:[],sync:'',
   copied:false,saved:false,wMode:'unica',wSingle:330,blend:[{pct:70,w:340},{pct:30,w:300}],
   bassBase:65,bassFinal:75,rendFar:5000,cvC:250,cvFerm:3,fEstilo:'napol',fTipo:'lenha',
   escala:{orig:6,dest:10},edit:null};
@@ -219,12 +231,55 @@ const g=v=>v>=1000?Math.round(v).toLocaleString('pt-BR'):v>=100?String(Math.roun
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ── PERSISTÊNCIA ── */
-function save(){try{localStorage.setItem(LS,JSON.stringify({recipes:S.recipes,dark:S.dark,last:S.p,nome:S.nome}));}catch(e){}}
+function save(){try{localStorage.setItem(LS,JSON.stringify({recipes:S.recipes,dark:S.dark,last:S.p,nome:S.nome,
+  aluno:S.aluno,turma:S.turma,pendDel:S.pendDel}));}catch(e){}}
 function load(){try{const r=JSON.parse(localStorage.getItem(LS)||'null');if(!r)return;
   if(Array.isArray(r.recipes))S.recipes=r.recipes;
   if(typeof r.dark==='boolean')S.dark=r.dark;
   if(r.last)S.p={...DEFAULT,...r.last};
-  if(r.nome)S.nome=r.nome;}catch(e){}}
+  if(r.nome)S.nome=r.nome;
+  if(typeof r.aluno==='string')S.aluno=r.aluno;
+  if(typeof r.turma==='string')S.turma=r.turma;
+  if(Array.isArray(r.pendDel))S.pendDel=r.pendDel;}catch(e){}}
+
+/* ── NUVEM ── */
+// Local primeiro: o localStorage é a fonte da verdade do aparelho; a nuvem é
+// espelho. Toda escrita local dispara um push; sem internet, fica pendente e
+// tenta de novo quando a conexão volta.
+async function cloudPush(){
+  // sem nada a enviar, não há o que afirmar sobre a rede — mantém o status
+  if(!S.pendDel.length && !S.recipes.length)return;
+  try{
+    for(const nome of [...S.pendDel]){
+      const r=await fetch(SB_URL+'?device_id=eq.'+DEV+'&nome=eq.'+encodeURIComponent(nome),
+        {method:'DELETE',headers:SB_HEAD});
+      if(!r.ok)throw 0;
+      S.pendDel=S.pendDel.filter(x=>x!==nome);
+    }
+    if(S.recipes.length){
+      const rows=S.recipes.map(r=>({device_id:DEV,aluno:S.aluno,turma:S.turma,
+        nome:r.name,params:r,updated_at:new Date().toISOString()}));
+      const resp=await fetch(SB_URL+'?on_conflict=device_id,nome',
+        {method:'POST',headers:{...SB_HEAD,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(rows)});
+      if(!resp.ok)throw 0;
+    }
+    S.sync='ok';
+  }catch(e){S.sync='err';}
+  save();render();
+}
+async function cloudPull(){
+  try{
+    const r=await fetch(SB_URL+'?device_id=eq.'+DEV+'&select=nome,params',{headers:SB_HEAD});
+    if(!r.ok)throw 0;
+    const rows=await r.json();
+    // agrega o que só existe na nuvem (ex.: reinstalou o app); o local prevalece
+    for(const row of rows){
+      if(S.pendDel.includes(row.nome))continue;
+      if(!S.recipes.some(x=>x.name===row.nome))S.recipes.push({...row.params,name:row.nome});
+    }
+    S.sync='ok';save();render();
+  }catch(e){if(!S.sync)S.sync='err';render();}
+}
 
 /* ── AÇÕES ── */
 const A={};
@@ -249,8 +304,12 @@ A.st=(k,v)=>{S[k]=v;render();};
 A.nome=e=>{S.nome=e.target.value;S.saved=false;};
 A.salvar=()=>{const nome=(S.nome||'Sem nome').trim();
   S.recipes=S.recipes.filter(r=>r.name!==nome).concat([{...S.p,name:nome}]);
-  S.saved=true;save();render();setTimeout(()=>{S.saved=false;render();},1800);};
-A.del=nome=>{S.recipes=S.recipes.filter(r=>r.name!==nome);save();render();};
+  S.pendDel=S.pendDel.filter(x=>x!==nome);
+  S.saved=true;save();render();cloudPush();setTimeout(()=>{S.saved=false;render();},1800);};
+A.del=nome=>{S.recipes=S.recipes.filter(r=>r.name!==nome);
+  if(!S.pendDel.includes(nome))S.pendDel.push(nome);
+  save();render();cloudPush();};
+A.id=(k,v)=>{S[k]=v.trim();save();render();cloudPush();};
 A.blendPct=(i,d)=>{S.edit=null;S.blend[i].pct=Math.max(0,Math.min(100,S.blend[i].pct+d));render();};
 A.blendW=(i,d)=>{S.edit=null;S.blend[i].w=Math.max(100,Math.min(500,S.blend[i].w+d));render();};
 A.addBlend=()=>{if(S.blend.length<5){S.blend.push({pct:0,w:300});render();}};
@@ -344,10 +403,18 @@ const metaTxt=r=>{const hp=r.pre==='nenhum'?0:(r.pre==='poolish'?(r.poolishH||12
 function vLib(){
   const c=S.recipes.length;
   const sub=c===0?'nenhuma receita salva':c+(c===1?' receita salva':' receitas salvas');
-  return `<div><div class="ttl">Receitas</div><div class="ttl-s">${sub}</div></div>
+  const st=S.sync==='ok'?'Sincronizado na nuvem.'
+         :S.sync==='err'?'Sem conexão — salvo neste aparelho; sincroniza quando a internet voltar.':'';
+  return `<div><div class="ttl">Receitas</div><div class="ttl-s">${sub}${st?' · '+st:''}</div></div>
    ${c>0?`<div class="blk"><div class="ov">Suas receitas</div>
      ${S.recipes.map((r,i)=>item(r.name,metaTxt(r),`A.open(S.recipes[${i}])`,`A.del('${esc(r.name).replace(/'/g,"\\'")}')`)).join('')}</div>`
-    :`<div class="dica">Comece por «Nova receita» — o que você salvar aparece aqui.</div>`}`;
+    :`<div class="dica">Comece por «Nova receita» — o que você salvar aparece aqui.</div>`}
+   <div class="blk"><div class="ov">Quem está usando</div>
+    <div class="g2"><input class="nm" value="${esc(S.aluno)}" placeholder="Seu nome"
+      onchange="A.id('aluno',this.value)" aria-label="Seu nome">
+    <input class="nm" value="${esc(S.turma)}" placeholder="Turma"
+      onchange="A.id('turma',this.value)" aria-label="Turma"></div>
+    <div class="dica">Identifique-se para o professor reconhecer suas receitas.</div></div>`;
 }
 
 function vStep0(){
@@ -631,6 +698,8 @@ function render(){
 /* ── INIT ── */
 load();
 render();
+cloudPull().then(cloudPush);
+window.addEventListener('online',cloudPush);
 </script>
 </body>
 </html>
