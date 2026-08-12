@@ -156,13 +156,8 @@ const LS='qtpizzapp_v2';
 const rate=t=>Math.pow(FERM_Q,Math.max(2,Math.min(35,t))-20);
 const poolishPct=h=>POOLISH_A*Math.exp(-POOLISH_K*Math.max(1,Math.min(24,h)));
 
-const PRESETS=[
- {name:'Napoletana QT',bolas:6,pbola:270,hidra:75,sal:3,malte:0,azeite:0,perda:3,tipo:'fresco',pre:'biga',prePct:50,poolishH:12,tAmb:22,hAmb:4,tCtrl:4,hCtrl:44},
- {name:'Contemporânea',bolas:6,pbola:280,hidra:80,sal:2.8,malte:0,azeite:0,perda:3,tipo:'fresco',pre:'biga',prePct:30,poolishH:12,tAmb:20,hAmb:3,tCtrl:4,hCtrl:24},
- {name:'Canotto 48h',bolas:6,pbola:270,hidra:78,sal:3,malte:0,azeite:0,perda:3,tipo:'fresco',pre:'poolish',prePct:30,poolishH:12,tAmb:20,hAmb:2,tCtrl:4,hCtrl:46},
- {name:'Direta 24h',bolas:6,pbola:260,hidra:65,sal:3,malte:0,azeite:0,perda:3,tipo:'fresco',pre:'nenhum',prePct:50,poolishH:12,tAmb:20,hAmb:2,tCtrl:4,hCtrl:22},
- {name:'Padela romana',bolas:4,pbola:500,hidra:80,sal:2.5,malte:0,azeite:2,perda:3,tipo:'fresco',pre:'nenhum',prePct:50,poolishH:12,tAmb:22,hAmb:3,tCtrl:4,hCtrl:20}
-];
+// Ponto de partida de uma receita nova: massa direta de 24h, neutra.
+const DEFAULT={bolas:6,pbola:260,hidra:65,sal:3,malte:0,azeite:0,perda:3,tipo:'fresco',pre:'nenhum',prePct:50,poolishH:12,tAmb:20,hAmb:2,tCtrl:4,hCtrl:22};
 const FORNO={
  napol:{n:'Napolitana',tempo:'60–90 s',piso:'420–480 °C',cupula:'500–520 °C',rot:'1–2 rotações (45 s)',obs:'Chama viva no lado. Delta-T piso/cúpula abaixo de 50 °C.'},
  contemp:{n:'Contemp.',tempo:'2–4 min',piso:'340–380 °C',cupula:'380–420 °C',rot:'1–2 rotações',obs:'Hidratação alta tolera temperatura mais baixa. Favorece leopardo uniforme.'},
@@ -172,7 +167,7 @@ const FORNO={
 };
 const FTIPO={lenha:['Lenha','Recuperação rápida, perfil aromático superior.'],gas:['Gás','Temperatura estável ao longo do serviço.'],eletrico:['Elétrico','Controle preciso de topo e sola.'],combinado:['Combi','Configure topo e sola separadamente.']};
 
-let S={view:'lib',step:0,dark:false,nome:'Napoletana QT',p:{...PRESETS[0]},recipes:[],
+let S={view:'lib',step:0,dark:false,nome:'Nova receita',p:{...DEFAULT},recipes:[],
   copied:false,saved:false,wMode:'unica',wSingle:330,blend:[{pct:70,w:340},{pct:30,w:300}],
   bassBase:65,bassFinal:75,rendFar:5000,cvC:250,cvFerm:3,fEstilo:'napol',fTipo:'lenha',
   escala:{orig:6,dest:10},edit:null};
@@ -228,7 +223,7 @@ function save(){try{localStorage.setItem(LS,JSON.stringify({recipes:S.recipes,da
 function load(){try{const r=JSON.parse(localStorage.getItem(LS)||'null');if(!r)return;
   if(Array.isArray(r.recipes))S.recipes=r.recipes;
   if(typeof r.dark==='boolean')S.dark=r.dark;
-  if(r.last)S.p={...PRESETS[0],...r.last};
+  if(r.last)S.p={...DEFAULT,...r.last};
   if(r.nome)S.nome=r.nome;}catch(e){}}
 
 /* ── AÇÕES ── */
@@ -245,8 +240,8 @@ A.back=()=>A.go(S.view==='recipe'||S.view==='tools'?'lib':'tools');
 A.theme=()=>{S.dark=!S.dark;save();render();};
 A.step=i=>{S.step=i;S.copied=false;render();document.querySelector('.ct').scrollTop=0;};
 A.next=()=>A.step(Math.min(3,S.step+1));
-A.open=r=>{S.p={...PRESETS[0],...r};S.nome=r.name;S.view='recipe';S.step=0;S.copied=false;S.saved=false;save();render();};
-A.nova=()=>{S.p={...PRESETS[3]};S.nome='Nova receita';S.view='recipe';S.step=0;render();};
+A.open=r=>{S.p={...DEFAULT,...r};S.nome=r.name;S.view='recipe';S.step=0;S.copied=false;S.saved=false;save();render();};
+A.nova=()=>{S.p={...DEFAULT};S.nome='Nova receita';S.view='recipe';S.step=0;render();};
 A.setP=(k,d,min,max)=>{S.edit=null;S.p[k]=Math.max(min,Math.min(max,+(S.p[k]+d).toFixed(2)));S.copied=false;S.saved=false;save();render();};
 A.setV=(k,v)=>{S.p[k]=v;S.copied=false;S.saved=false;save();render();};
 A.num=(k,d,min,max)=>{S.edit=null;S[k]=Math.max(min,Math.min(max,+(S[k]+d).toFixed(2)));render();};
@@ -348,12 +343,11 @@ const metaTxt=r=>{const hp=r.pre==='nenhum'?0:(r.pre==='poolish'?(r.poolishH||12
 /* ── VIEWS ── */
 function vLib(){
   const c=S.recipes.length;
-  const sub=c===0?'cinco padrões da casa':c+(c===1?' sua e cinco da casa':' suas e cinco da casa');
+  const sub=c===0?'nenhuma receita salva':c+(c===1?' receita salva':' receitas salvas');
   return `<div><div class="ttl">Receitas</div><div class="ttl-s">${sub}</div></div>
    ${c>0?`<div class="blk"><div class="ov">Suas receitas</div>
-     ${S.recipes.map((r,i)=>item(r.name,metaTxt(r),`A.open(S.recipes[${i}])`,`A.del('${esc(r.name).replace(/'/g,"\\'")}')`)).join('')}</div>`:''}
-   <div class="blk"><div class="ov">Padrões da casa</div>
-     ${PRESETS.map((r,i)=>item(r.name,metaTxt(r),`A.open(PRESETS[${i}])`)).join('')}</div>`;
+     ${S.recipes.map((r,i)=>item(r.name,metaTxt(r),`A.open(S.recipes[${i}])`,`A.del('${esc(r.name).replace(/'/g,"\\'")}')`)).join('')}</div>`
+    :`<div class="dica">Comece por «Nova receita» — o que você salvar aparece aqui.</div>`}`;
 }
 
 function vStep0(){
