@@ -710,7 +710,8 @@ load();
 render();
 cloudPull().then(cloudPush);
 window.addEventListener('online',cloudPush);
-if('serviceWorker' in navigator && location.protocol==='https:')
+// contexto seguro: https em produção, localhost para testar antes de publicar
+if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostname==='localhost'))
   navigator.serviceWorker.register('/sw.js');
 </script>
 </body>
