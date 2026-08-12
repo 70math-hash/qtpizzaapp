@@ -63,7 +63,6 @@ input{flex:1;min-width:190px}
   </div>
   <div id="stats"></div>
   <div class="tools" id="tools" hidden>
-    <select id="turma" onchange="pintar()"><option value="">Todas as turmas</option></select>
     <select id="ordem" onchange="pintar()">
       <option value="recente">Atividade mais recente</option>
       <option value="nome">Nome do aluno</option>
@@ -129,11 +128,6 @@ async function carregar(){
       {headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
     if(!r.ok)throw new Error('HTTP '+r.status);
     LINHAS=await r.json();
-    const ts=[...new Set(LINHAS.map(l=>(l.turma||'').trim()).filter(Boolean))].sort();
-    const sel=document.getElementById('turma'), atual=sel.value;
-    sel.innerHTML='<option value="">Todas as turmas</option>'+
-      ts.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
-    sel.value=atual;
     document.getElementById('tools').hidden=!LINHAS.length;
     pintar();
   }catch(e){
@@ -149,10 +143,9 @@ function agrupar(linhas){
   for(const l of linhas){
     const nome=(l.aluno||'').trim();
     const chave=nome?nome.toLowerCase():'dev:'+l.device_id;
-    if(!m.has(chave))m.set(chave,{nome:nome||'Sem identificação',turmas:new Set(),
+    if(!m.has(chave))m.set(chave,{nome:nome||'Sem identificação',
       aparelhos:new Set(),receitas:[],ultima:l.updated_at});
     const a=m.get(chave);
-    if(l.turma&&l.turma.trim())a.turmas.add(l.turma.trim());
     a.aparelhos.add(l.device_id);
     a.receitas.push(l);
     if(l.updated_at>a.ultima)a.ultima=l.updated_at;
@@ -161,12 +154,10 @@ function agrupar(linhas){
 }
 
 function pintar(){
-  const t=document.getElementById('turma').value;
   const q=document.getElementById('busca').value.trim().toLowerCase();
   const ordem=document.getElementById('ordem').value;
 
   let linhas=LINHAS;
-  if(t)linhas=linhas.filter(l=>(l.turma||'').trim()===t);
   if(q)linhas=linhas.filter(l=>((l.aluno||'')+' '+(l.nome||'')).toLowerCase().includes(q));
 
   let alunos=agrupar(linhas);
@@ -174,13 +165,14 @@ function pintar(){
     :ordem==='qtd'?b.receitas.length-a.receitas.length
     :b.ultima.localeCompare(a.ultima));
 
-  const turmas=new Set(LINHAS.map(l=>(l.turma||'').trim()).filter(Boolean));
-  const semNome=agrupar(LINHAS).filter(a=>a.nome==='Sem identificação').length;
+  const todos=agrupar(LINHAS);
+  const semNome=todos.filter(a=>a.nome==='Sem identificação').length;
+  const ativos=todos.filter(a=>(Date.now()-new Date(a.ultima))<7*864e5).length;
   document.getElementById('stats').innerHTML=
     `<div class="stats">
-      <div class="stat"><div class="stat-n">${agrupar(LINHAS).length}</div><div class="stat-l">Alunos</div></div>
+      <div class="stat"><div class="stat-n">${todos.length}</div><div class="stat-l">Alunos</div></div>
       <div class="stat"><div class="stat-n">${LINHAS.length}</div><div class="stat-l">Receitas</div></div>
-      <div class="stat"><div class="stat-n">${turmas.size}</div><div class="stat-l">Turmas</div></div>
+      <div class="stat"><div class="stat-n">${ativos}</div><div class="stat-l">Ativos na semana</div></div>
       <div class="stat"><div class="stat-n">${semNome}</div><div class="stat-l">Sem identificação</div></div>
      </div>`;
 
@@ -197,12 +189,11 @@ function pintar(){
   document.getElementById('lista').innerHTML=alunos.map((a,i)=>{
     const chave=a.nome.toLowerCase();
     const aberto=abertos.has(chave);
-    const turmasTxt=[...a.turmas].join(', ')||'sem turma';
     const rec=[...a.receitas].sort((x,y)=>y.updated_at.localeCompare(x.updated_at));
     return `<div class="al">
       <div class="al-h" onclick="alternar('${esc(chave).replace(/'/g,"\\'")}')">
         <div><div class="al-n">${esc(a.nome)}</div>
-          <div class="al-m">${esc(turmasTxt)} · última atividade ${quando(a.ultima)}${
+          <div class="al-m">última atividade ${quando(a.ultima)}${
             a.aparelhos.size>1?' · '+a.aparelhos.size+' aparelhos':''}</div></div>
         <div class="al-c">${rec.length} receita${rec.length>1?'s':''} ${aberto?'▲':'▼'}</div>
       </div>
