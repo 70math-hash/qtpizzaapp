@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>QT PizzApp · Painel</title>
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/negativa/icon-192.png">
+<style>
+:root{--bg:#EFECEC;--fg:#1A1E1E;--mid:#8A8578;--hair:#D6D2CC;--hair2:#E3DFDA;--inv:#1A1E1E;--invFg:#EFECEC}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);
+  font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px}
+.hd{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;
+  padding-bottom:20px;border-bottom:1px solid var(--hair)}
+.ov{font-size:9px;letter-spacing:.24em;text-transform:uppercase;color:var(--mid);font-weight:400}
+h1{font-size:30px;font-weight:500;letter-spacing:-.01em;margin-top:6px}
+.btn{padding:11px 18px;min-height:44px;border:1px solid var(--fg);background:transparent;color:var(--fg);
+  font:inherit;font-size:11px;letter-spacing:.16em;text-transform:uppercase;cursor:pointer}
+.btn:hover{background:var(--inv);color:var(--invFg)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--hair2);
+  border:1px solid var(--hair);margin:22px 0}
+.stat{background:var(--bg);padding:16px}
+.stat-n{font-size:28px;letter-spacing:-.01em}
+.stat-l{font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--mid);margin-top:4px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+select,input{font:inherit;font-size:14px;padding:11px 12px;min-height:44px;
+  border:1px solid var(--hair);background:#fff;color:var(--fg)}
+input{flex:1;min-width:190px}
+.al{border:1px solid var(--hair);background:#fff;margin-bottom:12px}
+.al-h{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:15px 17px;
+  cursor:pointer;user-select:none}
+.al-h:hover{background:#faf9f7}
+.al-n{font-size:17px;font-weight:500}
+.al-m{font-size:12px;color:var(--mid);margin-top:2px}
+.al-c{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);white-space:nowrap}
+.rcs{border-top:1px solid var(--hair2)}
+.rc{padding:14px 17px;border-bottom:1px solid var(--hair2)}
+.rc:last-child{border-bottom:0}
+.rc-t{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.rc-n{font-weight:500}
+.rc-d{font-size:11px;color:var(--mid)}
+.par{display:flex;flex-wrap:wrap;gap:0 22px;margin-top:9px}
+.p{font-size:12.5px;color:var(--mid)}
+.p b{color:var(--fg);font-weight:500;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  padding:3px 8px;border:1px solid var(--hair);color:var(--mid);margin-left:8px}
+.tag.on{border-color:var(--fg);color:var(--fg)}
+.msg{padding:44px 20px;text-align:center;color:var(--mid);border:1px solid var(--hair);background:#fff}
+.err{border-color:#9B4A3A;color:#9B4A3A}
+.ft{margin-top:26px;font-size:11.5px;color:var(--mid)}
+@media(max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hd">
+    <div><div class="ov">QT PizzApp</div><h1>Painel do professor</h1></div>
+    <button class="btn" onclick="carregar()">Atualizar</button>
+  </div>
+  <div id="stats"></div>
+  <div class="tools" id="tools" hidden>
+    <select id="turma" onchange="pintar()"><option value="">Todas as turmas</option></select>
+    <select id="ordem" onchange="pintar()">
+      <option value="recente">Atividade mais recente</option>
+      <option value="nome">Nome do aluno</option>
+      <option value="qtd">Mais receitas</option>
+    </select>
+    <input id="busca" placeholder="Buscar aluno ou receita" oninput="pintar()">
+  </div>
+  <div id="lista"><div class="msg">Carregando…</div></div>
+  <div class="ft" id="rodape"></div>
+</div>
+<script>
+const SB='https://helinoirdizwrluydkzp.supabase.co/rest/v1/pizzapp_receitas';
+const KEY='sb_publishable_ZTaUCZHHk57mDiGEjNyKLg_8qYNFvUg';
+
+/* ═══ Espelho do modelo de qt_pizzapp.html ═══
+   Se calc() mudar lá, atualize aqui, senão o painel mostra dose diferente
+   da que o aluno viu na tela.                                            */
+const FERM_A=7.327,FERM_P=1.4534,FERM_Q=1.1365;
+const POOLISH_A=3.9108,POOLISH_K=0.23089;
+const BIGA_PCT=1.0,PRE_CREDIT=2,BIGA_H=18;
+const rate=t=>Math.pow(FERM_Q,Math.max(2,Math.min(35,t))-20);
+const poolishPct=h=>POOLISH_A*Math.exp(-POOLISH_K*Math.max(1,Math.min(24,h)));
+const usaCtrl=p=>p.ctrl!==false;
+function calc(p){
+  const hCtrl=usaCtrl(p)?(p.hCtrl||0):0;
+  const E=rate(p.tAmb)*(p.hAmb||0)+rate(p.tCtrl)*hCtrl;
+  let direta=E>0?FERM_A*Math.pow(E,-FERM_P):5;
+  direta=Math.max(0.005,Math.min(5,direta));
+  let prePctF=0,refPctF=0,totalPct=direta;
+  if(p.pre&&p.pre!=='nenhum'){
+    const dosePre=p.pre==='poolish'?poolishPct(p.poolishH):BIGA_PCT;
+    prePctF=(p.prePct/100)*dosePre;
+    refPctF=Math.max(0,direta*(1-p.prePct/100)-PRE_CREDIT*prePctF);
+    totalPct=prePctF+refPctF;
+  }
+  const cv=p.tipo==='seco'?1/3:p.tipo==='natural'?10:1;
+  const lev=+(totalPct*cv).toPrecision(3);
+  const soma=1+p.hidra/100+p.sal/100+lev/100+(p.malte||0)/100+(p.azeite||0)/100;
+  const far=p.bolas*p.pbola*(1+(p.perda||0)/100)/soma;
+  const horasPre=!p.pre||p.pre==='nenhum'?0:(p.pre==='poolish'?(p.poolishH||12):BIGA_H);
+  return {far,lev,levg:far*lev/100,horas:(p.hAmb||0)+hCtrl,horasReal:horasPre+(p.hAmb||0)+hCtrl,
+    semRefresco:p.pre&&p.pre!=='nenhum'&&refPctF<=0.0001};
+}
+/* ═══ fim do espelho ═══ */
+
+const n=(v,d)=>Number(v).toFixed(d).replace('.',',');
+const g=v=>v>=1000?Math.round(v).toLocaleString('pt-BR'):v>=100?String(Math.round(v)):n(v,1);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const quando=iso=>{
+  const d=new Date(iso), min=(Date.now()-d)/6e4;
+  if(min<60)return'há '+Math.max(1,Math.round(min))+' min';
+  if(min<1440)return'há '+Math.round(min/60)+'h';
+  if(min<10080)return'há '+Math.round(min/1440)+'d';
+  return d.toLocaleDateString('pt-BR');
+};
+
+let LINHAS=[], abertos=new Set();
+
+async function carregar(){
+  document.getElementById('lista').innerHTML='<div class="msg">Carregando…</div>';
+  try{
+    const r=await fetch(SB+'?select=*&order=updated_at.desc',
+      {headers:{apikey:KEY,Authorization:'Bearer '+KEY}});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    LINHAS=await r.json();
+    const ts=[...new Set(LINHAS.map(l=>(l.turma||'').trim()).filter(Boolean))].sort();
+    const sel=document.getElementById('turma'), atual=sel.value;
+    sel.innerHTML='<option value="">Todas as turmas</option>'+
+      ts.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+    sel.value=atual;
+    document.getElementById('tools').hidden=!LINHAS.length;
+    pintar();
+  }catch(e){
+    document.getElementById('stats').innerHTML='';
+    document.getElementById('lista').innerHTML=
+      '<div class="msg err">Não foi possível carregar. Verifique a conexão e tente atualizar.<br>('+esc(e.message)+')</div>';
+  }
+}
+
+// Agrupa por aluno: o mesmo nome em dois aparelhos vira um aluno só.
+function agrupar(linhas){
+  const m=new Map();
+  for(const l of linhas){
+    const nome=(l.aluno||'').trim();
+    const chave=nome?nome.toLowerCase():'dev:'+l.device_id;
+    if(!m.has(chave))m.set(chave,{nome:nome||'Sem identificação',turmas:new Set(),
+      aparelhos:new Set(),receitas:[],ultima:l.updated_at});
+    const a=m.get(chave);
+    if(l.turma&&l.turma.trim())a.turmas.add(l.turma.trim());
+    a.aparelhos.add(l.device_id);
+    a.receitas.push(l);
+    if(l.updated_at>a.ultima)a.ultima=l.updated_at;
+  }
+  return [...m.values()];
+}
+
+function pintar(){
+  const t=document.getElementById('turma').value;
+  const q=document.getElementById('busca').value.trim().toLowerCase();
+  const ordem=document.getElementById('ordem').value;
+
+  let linhas=LINHAS;
+  if(t)linhas=linhas.filter(l=>(l.turma||'').trim()===t);
+  if(q)linhas=linhas.filter(l=>((l.aluno||'')+' '+(l.nome||'')).toLowerCase().includes(q));
+
+  let alunos=agrupar(linhas);
+  alunos.sort((a,b)=>ordem==='nome'?a.nome.localeCompare(b.nome,'pt-BR')
+    :ordem==='qtd'?b.receitas.length-a.receitas.length
+    :b.ultima.localeCompare(a.ultima));
+
+  const turmas=new Set(LINHAS.map(l=>(l.turma||'').trim()).filter(Boolean));
+  const semNome=agrupar(LINHAS).filter(a=>a.nome==='Sem identificação').length;
+  document.getElementById('stats').innerHTML=
+    `<div class="stats">
+      <div class="stat"><div class="stat-n">${agrupar(LINHAS).length}</div><div class="stat-l">Alunos</div></div>
+      <div class="stat"><div class="stat-n">${LINHAS.length}</div><div class="stat-l">Receitas</div></div>
+      <div class="stat"><div class="stat-n">${turmas.size}</div><div class="stat-l">Turmas</div></div>
+      <div class="stat"><div class="stat-n">${semNome}</div><div class="stat-l">Sem identificação</div></div>
+     </div>`;
+
+  if(!LINHAS.length){
+    document.getElementById('lista').innerHTML=
+      '<div class="msg">Nenhuma receita ainda. Assim que os alunos salvarem, aparece aqui.</div>';
+    return;
+  }
+  if(!alunos.length){
+    document.getElementById('lista').innerHTML='<div class="msg">Nada encontrado com esse filtro.</div>';
+    return;
+  }
+
+  document.getElementById('lista').innerHTML=alunos.map((a,i)=>{
+    const chave=a.nome.toLowerCase();
+    const aberto=abertos.has(chave);
+    const turmasTxt=[...a.turmas].join(', ')||'sem turma';
+    const rec=[...a.receitas].sort((x,y)=>y.updated_at.localeCompare(x.updated_at));
+    return `<div class="al">
+      <div class="al-h" onclick="alternar('${esc(chave).replace(/'/g,"\\'")}')">
+        <div><div class="al-n">${esc(a.nome)}</div>
+          <div class="al-m">${esc(turmasTxt)} · última atividade ${quando(a.ultima)}${
+            a.aparelhos.size>1?' · '+a.aparelhos.size+' aparelhos':''}</div></div>
+        <div class="al-c">${rec.length} receita${rec.length>1?'s':''} ${aberto?'▲':'▼'}</div>
+      </div>
+      ${aberto?`<div class="rcs">${rec.map(linha).join('')}</div>`:''}
+    </div>`;
+  }).join('');
+
+  document.getElementById('rodape').textContent=
+    'Atualizado '+new Date().toLocaleTimeString('pt-BR')+'. As receitas chegam aqui quando o aluno salva com internet.';
+}
+
+function linha(l){
+  const p=l.params||{}, c=calc(p);
+  const pre=!p.pre||p.pre==='nenhum'?'direta'
+    :(p.pre==='biga'?'biga':'poolish')+' '+n(p.prePct,0)+'%';
+  return `<div class="rc">
+    <div class="rc-t"><div class="rc-n">${esc(l.nome)}
+      <span class="tag ${p.pre&&p.pre!=='nenhum'?'on':''}">${esc(pre)}</span>
+      ${c.semRefresco?'<span class="tag on">sem refresco</span>':''}
+      ${!usaCtrl(p)?'<span class="tag">sem geladeira</span>':''}</div>
+      <div class="rc-d">${quando(l.updated_at)}</div></div>
+    <div class="par">
+      <span class="p">Bolas <b>${p.bolas}×${n(p.pbola,0)} g</b></span>
+      <span class="p">Hidratação <b>${n(p.hidra,1)}%</b></span>
+      <span class="p">Sal <b>${n(p.sal,1)}%</b></span>
+      <span class="p">Ambiente <b>${n(p.hAmb,1)}h a ${n(p.tAmb,0)}°C</b></span>
+      ${usaCtrl(p)?`<span class="p">Geladeira <b>${n(p.hCtrl,1)}h a ${n(p.tCtrl,0)}°C</b></span>`:''}
+      <span class="p">Total <b>${n(c.horasReal,0)}h</b></span>
+      <span class="p">Farinha <b>${g(c.far)} g</b></span>
+      <span class="p">Fermento <b>${g(c.levg)} g (${n(c.lev,3)}%)</b></span>
+    </div></div>`;
+}
+
+function alternar(chave){
+  abertos.has(chave)?abertos.delete(chave):abertos.add(chave);
+  pintar();
+}
+
+carregar();
+</script>
+</body>
+</html>
