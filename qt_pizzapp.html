@@ -185,12 +185,15 @@ function calc(){
   direta = Math.max(0.005, Math.min(5, direta));
 
   // O pré-fermento tem sua própria dose; o refresco completa só o que a
-  // maturação não cobre, creditando o pré maduro a PRE_CREDIT × o nominal.
+  // maturação não cobre. Dois ajustes sobre a dose direta: (1) ela é orçada
+  // apenas sobre a fração de farinha que NÃO está no pré — a farinha do pré
+  // chega madura ao impasto finale e não precisa de novo orçamento; (2) o pré
+  // maduro é creditado a PRE_CREDIT × o fermento nominal.
   let prePctF=0, refPctF=0, totalPct=direta, dosePre=0;
   if(p.pre!=='nenhum'){
     dosePre = p.pre==='poolish' ? poolishPct(p.poolishH) : BIGA_PCT;
     prePctF = (p.prePct/100)*dosePre;
-    refPctF = Math.max(0, direta - PRE_CREDIT*prePctF);
+    refPctF = Math.max(0, direta*(1-p.prePct/100) - PRE_CREDIT*prePctF);
     totalPct = prePctF + refPctF;
   }
   // conversão de tipo mantendo a proporção da divisão
