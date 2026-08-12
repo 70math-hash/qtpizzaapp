@@ -47,7 +47,7 @@ input{font-family:inherit;color:inherit;background:none;border:none;outline:none
 .hd-s{font-size:10px;font-weight:200;font-style:italic;color:var(--mid);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* STEPS */
-.steps{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--hair2);border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.steps{flex:none;display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--hair2);border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
 .stp{padding:11px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:5px;min-height:44px;background:var(--bg);color:var(--mid)}
 .stp.on{background:var(--inv);color:var(--invFg)}
 .stp-n{font-family:var(--ex);font-size:12px;letter-spacing:.04em}
@@ -131,7 +131,7 @@ input{font-family:inherit;color:inherit;background:none;border:none;outline:none
 .ft-b{border-top:1px solid var(--hair);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .ft-t{font-size:12px;font-weight:200;font-style:italic;color:var(--mid);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ft-x{background:var(--bg);color:var(--fg);padding:13px 22px;min-height:44px;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:400;flex:none}
-.lib-ft{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);border-top:1px solid var(--hair)}
+.lib-ft{display:grid;grid-template-columns:1fr;gap:1px;background:var(--hair);border-top:1px solid var(--hair)}
 .lib-b{padding:19px;min-height:44px;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:400;background:var(--bg);color:var(--fg)}
 .lib-b.inv{background:var(--inv);color:var(--invFg)}
 
@@ -187,20 +187,10 @@ const poolishPct=h=>POOLISH_A*Math.exp(-POOLISH_K*Math.max(1,Math.min(24,h)));
 
 // Ponto de partida de uma receita nova: massa direta de 24h, neutra.
 const DEFAULT={bolas:6,pbola:260,hidra:65,sal:3,malte:0,azeite:0,perda:3,tipo:'fresco',pre:'nenhum',prePct:50,poolishH:12,tAmb:20,hAmb:2,tCtrl:4,hCtrl:22};
-const FORNO={
- napol:{n:'Napolitana',tempo:'60–90 s',piso:'420–480 °C',cupula:'500–520 °C',rot:'1–2 rotações (45 s)',obs:'Chama viva no lado. Delta-T piso/cúpula abaixo de 50 °C.'},
- contemp:{n:'Contemp.',tempo:'2–4 min',piso:'340–380 °C',cupula:'380–420 °C',rot:'1–2 rotações',obs:'Hidratação alta tolera temperatura mais baixa. Favorece leopardo uniforme.'},
- romana:{n:'Romana',tempo:'3–5 min',piso:'300–340 °C',cupula:'340–370 °C',rot:'1 rotação a 2 min',obs:'Pré-assar 2 min, cobrir e finalizar com calor superior.'},
- padela:{n:'Padela',tempo:'5–8 min',piso:'280–310 °C',cupula:'300–330 °C',rot:'Sem rotação',obs:'Pré-assar a base 3 min antes de cobrir.'},
- americana:{n:'Americana',tempo:'8–12 min',piso:'240–270 °C',cupula:'260–290 °C',rot:'Opcional',obs:'Temperatura baixa para assar por dentro sem queimar a crosta.'}
-};
-const FTIPO={lenha:['Lenha','Recuperação rápida, perfil aromático superior.'],gas:['Gás','Temperatura estável ao longo do serviço.'],eletrico:['Elétrico','Controle preciso de topo e sola.'],combinado:['Combi','Configure topo e sola separadamente.']};
-
 let S={view:'lib',step:0,dark:false,nome:'Nova receita',p:{...DEFAULT},recipes:[],
   aluno:'',turma:'',pendDel:[],sync:'',
   copied:false,saved:false,wMode:'unica',wSingle:330,blend:[{pct:70,w:340},{pct:30,w:300}],
-  bassBase:65,bassFinal:75,rendFar:5000,cvC:250,cvFerm:3,fEstilo:'napol',fTipo:'lenha',
-  escala:{orig:6,dest:10},edit:null};
+  bassBase:65,bassFinal:75,edit:null};
 
 /* ── CÁLCULO ── */
 function calc(){
@@ -301,7 +291,7 @@ async function cloudPull(){
 
 /* ── AÇÕES ── */
 const A={};
-// leitura/escrita por caminho: 'p.hidra', 'wSingle', 'blend.0.pct', 'escala.orig'
+// leitura/escrita por caminho: 'p.hidra', 'wSingle', 'blend.0.pct'
 const getPath=path=>path.split('.').reduce((o,k)=>o[k],S);
 const setPath=(path,v)=>{const k=path.split('.'),last=k.pop();
   k.reduce((o,x)=>o[x],S)[last]=v;};
@@ -309,7 +299,8 @@ const setPath=(path,v)=>{const k=path.split('.'),last=k.pop();
 // não sobrescreva o que a pessoa está digitando (ex.: apagar tudo para redigitar).
 const parseNum=t=>{const v=parseFloat(String(t).replace(',','.'));return isFinite(v)?v:null;};
 A.go=v=>{S.view=v;S.copied=false;S.saved=false;render();document.querySelector('.ct').scrollTop=0;};
-A.back=()=>A.go(S.view==='recipe'||S.view==='tools'?'lib':'tools');
+// Força W e Bassinage abrem a partir do passo 05; voltar devolve para lá.
+A.back=()=>{if(S.view==='w'||S.view==='bass'){S.step=4;A.go('recipe');return;}A.go('lib');};
 A.theme=()=>{S.dark=!S.dark;save();render();};
 A.step=i=>{S.step=i;S.copied=false;render();document.querySelector('.ct').scrollTop=0;};
 A.next=()=>A.step(Math.min(3,S.step+1));
@@ -319,6 +310,10 @@ A.setP=(k,d,min,max)=>{S.edit=null;S.p[k]=Math.max(min,Math.min(max,+(S.p[k]+d).
 A.setV=(k,v)=>{S.p[k]=v;S.copied=false;S.saved=false;save();render();};
 A.num=(k,d,min,max)=>{S.edit=null;S[k]=Math.max(min,Math.min(max,+(S[k]+d).toFixed(2)));render();};
 A.st=(k,v)=>{S[k]=v;render();};
+// Os botões segmentados chamam o manipulador com um argumento só.
+A.tipo=v=>A.setV('tipo',v);
+A.pre=v=>A.setV('pre',v);
+A.wMode=v=>A.st('wMode',v);
 A.nome=e=>{S.nome=e.target.value;S.saved=false;};
 A.salvar=()=>{const nome=(S.nome||'Sem nome').trim();
   S.recipes=S.recipes.filter(r=>r.name!==nome).concat([{...S.p,name:nome}]);
@@ -331,7 +326,6 @@ A.id=(k,v)=>{S[k]=v.trim();save();render();cloudPush();};
 A.blendPct=(i,d)=>{S.edit=null;S.blend[i].pct=Math.max(0,Math.min(100,S.blend[i].pct+d));render();};
 A.blendW=(i,d)=>{S.edit=null;S.blend[i].w=Math.max(100,Math.min(500,S.blend[i].w+d));render();};
 A.addBlend=()=>{if(S.blend.length<5){S.blend.push({pct:0,w:300});render();}};
-A.escala=(k,d)=>{S.edit=null;S.escala[k]=Math.max(1,Math.min(200,S.escala[k]+d));render();};
 
 A.edIn=(fk,path,min,max,dec,ev)=>{
   const raw=ev.target.value;
@@ -508,12 +502,8 @@ function vStep3(){
 
 function vTools(){
   const T=[['Força W','A farinha que você tem.','w'],
-    ['Bassinage','A água que entra depois.','bass'],
-    ['Rendimento','Quantas bolas dá a farinha.','rend'],
-    ['Escalar','Mais ou menos bolas.','esc'],
-    ['Conversões','Temperatura e fermento.','conv'],
-    ['Forno','Tempo, piso e cúpula.','forno']];
-  return secTitle('Apoio','Ferramentas','')
+    ['Bassinage','A água que entra depois.','bass']];
+  return secTitle('Passo 05','Apoio','cálculos de farinha e água.')
    +`<div class="blk">${T.map((t,i)=>item(t[0],t[1],`A.go('${t[2]}')`,null,'0'+(i+1))).join('')}</div>`;
 }
 
@@ -562,70 +552,8 @@ function vBass(){
    <div class="blk"><div class="ov">Protocolo</div><div class="note">${proto}</div></div>`;
 }
 
-function vRend(){
-  const c=calc(),p=S.p;
-  const soma=1+p.hidra/100+p.sal/100+c.lev/100+p.malte/100+p.azeite/100;
-  const tot=S.rendFar*soma, bolas=Math.floor(tot/(p.pbola*(1+(p.perda||0)/100)));
-  const sobra=tot-bolas*p.pbola*(1+(p.perda||0)/100);
-  return secTitle('Ferramenta 03','Rendimento','quantas bolas dá a farinha.')+`
-   ${stepper('Farinha disponível',g(S.rendFar),'g',"A.num('rendFar',-250,250,50000)","A.num('rendFar',250,250,50000)",0,['rendFar',250,50000,0])}
-   <div style="border:1px solid var(--hair);padding:20px;text-align:center">
-     <div class="ov">Bolas de ${n(p.pbola,0)} g</div>
-     <div class="ex" style="font-size:72px;line-height:1;margin:12px 0">${bolas}</div>
-     <div class="ttl-s" style="margin:0">na hidratação e no sal desta receita.</div></div>
-   <div class="blk">${rows([{k:'Massa total',v:g(tot)+' g'},{k:'Água',v:g(S.rendFar*p.hidra/100)+' g'},
-     {k:'Sal',v:g(S.rendFar*p.sal/100)+' g'},{k:'Sobra',v:g(Math.max(0,sobra))+' g'}])}</div>`;
-}
-
-function vEsc(){
-  const c=calc(),e=S.escala,f=e.dest/e.orig;
-  const ing=[['Farinha',c.far],['Água',c.agua],['Sal',c.salg],['Fermento',c.levg]];
-  if(S.p.malte>0)ing.push(['Malte',c.maltg]);
-  if(S.p.azeite>0)ing.push(['Azeite',c.azg]);
-  return secTitle('Ferramenta 04','Escalar','a mesma receita, outra quantidade.')+`
-   <div class="g2">${stepper('Original',String(e.orig),'un',"A.escala('orig',-1)","A.escala('orig',1)",1,['escala.orig',1,200,0])}
-    ${stepper('Desejado',String(e.dest),'un',"A.escala('dest',-1)","A.escala('dest',1)",1,['escala.dest',1,200,0])}</div>
-   <div style="border:1px solid var(--hair);padding:18px;display:flex;justify-content:space-between;align-items:baseline">
-     <span class="ov">Fator</span><span class="ex" style="font-size:34px">${n(f,3)}×</span></div>
-   <div class="blk"><div class="ov">Receita escalada</div>
-     ${rows(ing.map(x=>({k:x[0],v:g(x[1]*f)+' g'})))}</div>
-   <div class="blk">${rows([{k:'Massa total',v:g(c.total*f)+' g'}])}</div>`;
-}
-
-function vConv(){
-  return secTitle('Ferramenta 05','Conversões','temperatura e fermento.')+`
-   <div class="blk"><div class="ov">Temperatura</div>
-    <div class="st"><button class="st-b" onclick="A.num('cvC',-5,-20,600)">−</button>
-     <div class="st-v"><span class="ex" style="font-size:24px">${S.cvC} °C</span>
-      <span class="ex" style="font-size:24px;color:var(--mid)">= ${Math.round(S.cvC*9/5+32)} °F</span></div>
-     <button class="st-b" onclick="A.num('cvC',5,-20,600)">+</button></div></div>
-   <div class="blk"><div class="ov">Fermento fresco</div>
-    ${stepper('',n(S.cvFerm,1),'g',"A.num('cvFerm',-0.5,0,200)","A.num('cvFerm',0.5,0,200)",0,['cvFerm',0,200,1])}
-    ${rows([{k:'Seco ativo',v:n(S.cvFerm/3,2)+' g'},{k:'Instantâneo',v:n(S.cvFerm/3.3,2)+' g'},
-            {k:'Levain 100%',v:n(S.cvFerm*10,1)+' g'}])}</div>`;
-}
-
-function vForno(){
-  const fo=FORNO[S.fEstilo],ft=FTIPO[S.fTipo];
-  return secTitle('Ferramenta 06','Forno','tempo, piso e cúpula.')+`
-   <div class="blk"><div class="st-lb">Estilo</div>
-    ${segmented(Object.keys(FORNO).map(k=>[FORNO[k].n,k]),S.fEstilo,"A.fEstilo",3)}</div>
-   <div class="blk"><div class="st-lb">Forno</div>
-    ${segmented(Object.keys(FTIPO).map(k=>[FTIPO[k][0],k]),S.fTipo,"A.fTipo",4)}</div>
-   ${outGrid([{v:fo.tempo,l:'Tempo'},{v:fo.piso,l:'Piso'},{v:fo.cupula,l:'Cúpula'},{v:fo.rot,l:'Rotação'}],1)}
-   <div class="dica">${fo.obs} ${ft[1]}</div>`;
-}
-
-/* ── handlers de segmentados ── */
-A.tipo   = v=>A.setV('tipo',v);
-A.pre    = v=>A.setV('pre',v);
-A.wMode  = v=>A.st('wMode',v);
-A.fEstilo= v=>A.st('fEstilo',v);
-A.fTipo  = v=>A.st('fTipo',v);
-
 /* ── RENDER ── */
-const TITLES={lib:'Receitas',recipe:'',tools:'Ferramentas',w:'Força W',bass:'Bassinage',
-  rend:'Rendimento',esc:'Escalar',conv:'Conversões',forno:'Forno'};
+const TITLES={lib:'Receitas',recipe:'',w:'Força W',bass:'Bassinage'};
 
 function render(){
   const V=S.view,p=S.p,c=calc();
@@ -641,26 +569,20 @@ function render(){
 
   let body='';
   if(V==='lib')body=vLib();
-  else if(V==='recipe')body=[vStep0,vStep1,vStep2,vStep3][S.step]();
-  else if(V==='tools')body=vTools();
+  else if(V==='recipe')body=[vStep0,vStep1,vStep2,vStep3,vTools][S.step]();
   else if(V==='w')body=vW();
   else if(V==='bass')body=vBass();
-  else if(V==='rend')body=vRend();
-  else if(V==='esc')body=vEsc();
-  else if(V==='conv')body=vConv();
-  else if(V==='forno')body=vForno();
 
   const steps = V==='recipe' ? `<div class="steps">${
-    ['Massa','Água','Fermento','Ficha'].map((l,i)=>
+    ['Massa','Água','Fermento','Ficha','Apoio'].map((l,i)=>
       `<button class="stp${S.step===i?' on':''}" onclick="A.step(${i})">
         <span class="stp-n">0${i+1}</span><span class="stp-l">${l}</span></button>`).join('')}</div>` : '';
 
   let footer='';
   if(V==='lib'){
     footer=`<div class="lib-ft">
-      <button class="lib-b" onclick="A.nova()">Nova receita</button>
-      <button class="lib-b inv" onclick="A.go('tools')">Ferramentas</button></div>`;
-  }else if(V==='recipe'&&S.step!==3){
+      <button class="lib-b" onclick="A.nova()">Nova receita</button></div>`;
+  }else if(V==='recipe'&&S.step<3){   // o fluxo termina na Ficha; Apoio é consulta
     const cells=[[g(c.far),'Farinha'],[g(c.agua),'Água'],[g(c.salg),'Sal'],[g(c.levg),'Fermento']];
     footer=`<div class="ft"><div class="ft-g">${cells.map(x=>
       `<div class="ft-c"><div class="ft-n">${x[0]}</div><div class="ft-l">${x[1]}</div></div>`).join('')}</div>
