@@ -538,17 +538,34 @@ function vW(){
 }
 
 function vBass(){
-  const c=calc(),W=curW();
+  const c=calc(),p=S.p;
   const far=c.far>0?c.far:1000;
-  const ab=far*S.bassBase/100, af=far*S.bassFinal/100, ex=af-ab, d=S.bassFinal-S.bassBase;
+  // As hidratações são sobre a farinha total. Quando há pré-fermento, parte
+  // dessa água já foi para a biga/poolish na véspera: o que se pesa na masseira
+  // é só o restante.
+  const ehBiga=p.pre==='biga';
+  const preName=ehBiga?'biga':'poolish', art=ehBiga?'a':'o';
+  const aguaPre = p.pre!=='nenhum' ? c.ab : 0;
+  const base=far*S.bassBase/100, af=far*S.bassFinal/100;
+  const ex=af-base, d=S.bassFinal-S.bassBase;
+  const naMistura=Math.max(0,base-aguaPre);
   const proto=ex<=0?'Hidratação final igual ou menor que a base. Não há bassinage a fazer.'
     :d<=5?'Delta pequeno. Incorpore a água extra de uma vez, depois do ponto de véu, em velocidade baixa.'
     :d<=10?'Colocar a primeira parte junto da farinha e deixar formar o glúten. Só depois adicionar o restante.'
     :'Três ou mais etapas de '+g(ex/3)+' g, com 2–3 min de descanso entre elas. A massa precisa reabsorver antes da próxima.';
+  let nota='';
+  if(p.pre!=='nenhum')
+    nota = aguaPre>=base
+      ? `<div class="warn">${art.toUpperCase()} ${preName} sozinh${art} já carrega ${g(aguaPre)} g de água — mais do que
+         a hidratação base de ${n(S.bassBase,1)}% pede. Suba a base ou reduza a % de farinha n${art} ${preName}.</div>`
+      : `<div class="dica">Da água base, ${g(aguaPre)} g já estão n${art} ${preName}, feit${art} na véspera.
+         O valor acima é só o que entra no impasto finale.</div>`;
   return secTitle('Ferramenta 02','Bassinage','a água que entra depois.')+`
    <div class="g2">${stepper('Hidratação base',n(S.bassBase,1),'%',"A.num('bassBase',-0.5,40,90)","A.num('bassBase',0.5,40,90)",1,['bassBase',40,90,1])}
     ${stepper('Hidratação final',n(S.bassFinal,1),'%',"A.num('bassFinal',-0.5,40,95)","A.num('bassFinal',0.5,40,95)",1,['bassFinal',40,95,1])}</div>
-   ${outGrid([{v:g(ab),u:'g',l:'Água na mistura'},{v:ex>0?g(ex):'0',u:'g',l:'Água tardia'}])}
+   ${outGrid([{v:naMistura>0?g(naMistura):'0',u:'g',l:p.pre==='nenhum'?'Água na mistura':'Água no impasto finale'},
+              {v:ex>0?g(ex):'0',u:'g',l:'Água tardia'}])}
+   ${nota}
    <div class="blk"><div class="ov">Protocolo</div><div class="note">${proto}</div></div>`;
 }
 
