@@ -38,7 +38,7 @@ button{font-family:inherit;color:inherit;background:none;border:none;cursor:poin
 input{font-family:inherit;color:inherit;background:none;border:none;outline:none}
 
 /* HEADER */
-.hd{flex:none;display:flex;align-items:center;gap:10px;padding:10px 18px 15px}
+.hd{flex:none;display:flex;align-items:center;gap:10px;padding:10px 22px 15px}
 .hd-btn{width:36px;height:36px;flex:none;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:300;position:relative}
 .hd-btn::after,.hd-th::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px}
 .hd-th{width:36px;height:36px;flex:none;border:1px solid var(--hair);font-size:9px;letter-spacing:.1em;display:flex;align-items:center;justify-content:center;position:relative}
@@ -47,22 +47,28 @@ input{font-family:inherit;color:inherit;background:none;border:none;outline:none
 .hd-s{font-size:10px;font-weight:200;font-style:italic;color:var(--mid);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 /* STEPS */
-.steps{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--hair2)}
+.steps{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--hair2);border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
 .stp{padding:11px 4px 12px;display:flex;flex-direction:column;align-items:center;gap:5px;min-height:44px;background:var(--bg);color:var(--mid)}
 .stp.on{background:var(--inv);color:var(--invFg)}
-.stp-n{font-family:var(--ex);font-size:12px}
+.stp-n{font-family:var(--ex);font-size:12px;letter-spacing:.04em}
 .stp-l{font-size:8px;letter-spacing:.2em;text-transform:uppercase;font-weight:300}
 
 /* CONTENT */
 .ct>*{flex:none}
-.ct{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 22px 30px;display:flex;flex-direction:column;gap:26px;-webkit-overflow-scrolling:touch}
-.ttl{font-family:var(--ex);font-size:32px;line-height:1.05}
+.ct{flex:1;overflow-y:auto;overflow-x:hidden;padding:26px 22px 34px;display:flex;flex-direction:column;gap:24px;-webkit-overflow-scrolling:touch;text-wrap:pretty}
+.ttl{font-family:var(--ex);font-size:32px;line-height:1.05;letter-spacing:-.012em}
 .ttl-s{font-size:15px;font-weight:200;font-style:italic;color:var(--mid);line-height:1.4;margin-top:6px}
-.disp{font-family:var(--ex);font-size:30px;line-height:1.05}
+.disp{font-family:var(--ex);font-size:30px;line-height:1.05;letter-spacing:-.012em}
+/* CABEÇALHO DE SEÇÃO — overline · display · itálico · fio */
+.sec{display:flex;flex-direction:column}
+.sec-d{font-family:var(--ex);font-size:30px;line-height:1.05;letter-spacing:-.012em}
+.ov+.sec-d{margin-top:9px}
+.sec-s{font-size:15px;font-weight:200;font-style:italic;color:var(--mid);line-height:1.4;margin-top:5px}
+.sec-h{height:1px;background:var(--hair);margin-top:21px}
 .ov{font-size:9px;font-weight:300;letter-spacing:.32em;text-transform:uppercase;color:var(--mid)}
 .hair{height:1px;background:var(--hair)}
 .dica{font-size:12.5px;font-weight:200;font-style:italic;color:var(--mid);line-height:1.8;border-left:1px solid var(--hair);padding-left:14px}
-.blk{display:flex;flex-direction:column;gap:14px}
+.blk{display:flex;flex-direction:column;gap:12px}
 
 /* STEPPER */
 .st{display:grid;grid-template-columns:56px 1fr 56px;height:58px;border:1px solid var(--hair)}
@@ -89,15 +95,16 @@ input{font-family:inherit;color:inherit;background:none;border:none;outline:none
 .rw{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-bottom:9px;border-bottom:1px solid var(--hair3)}
 .rw:last-child{border-bottom:none;padding-bottom:0}
 .rw-k{font-size:12.5px;font-weight:300;color:var(--mid)}
-.rw-v{font-family:var(--ex);font-size:13px;text-align:right}
+.rw-v{font-family:var(--ex);font-size:14px;text-align:right}
 .og{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair2);border:1px solid var(--hair)}
-.oc{background:var(--bg);padding:15px 16px 14px}
-.oc-n{font-family:var(--ex);font-size:23px}
+.oc{background:var(--bg);padding:17px 16px 16px}
+.oc-n{font-family:var(--ex);font-size:26px;letter-spacing:-.01em}
 .oc-u{font-size:9px;opacity:.45;margin-left:2px}
 .oc-l{font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;font-weight:300;color:var(--mid);margin-top:6px}
 
 /* LIST ITEM */
 .it{display:flex;align-items:stretch;border:1px solid var(--hair)}
+.it-x{width:44px;flex:none;display:flex;align-items:center;justify-content:center;font-family:var(--ex);font-size:12px;color:var(--mid);border-right:1px solid var(--hair)}
 .it-m{flex:1;min-width:0;padding:15px 16px;text-align:left}
 .it-n{font-family:var(--ex);font-size:15px}
 .it-d{font-size:11px;font-weight:300;color:var(--mid);margin-top:5px;line-height:1.5}
@@ -112,16 +119,16 @@ input{font-family:inherit;color:inherit;background:none;border:none;outline:none
 /* DOSE BOX */
 .dz{border:1px solid var(--hair);padding:16px 18px;display:flex;justify-content:space-between;align-items:flex-end;gap:14px}
 .dz-s{font-size:11.5px;font-weight:200;font-style:italic;color:var(--mid);margin-top:6px}
-.dz-n{font-family:var(--ex);font-size:28px;white-space:nowrap}
+.dz-n{font-family:var(--ex);font-size:32px;letter-spacing:-.01em;white-space:nowrap}
 .dz-u{font-size:10px;opacity:.5;margin-left:2px}
 
 /* FOOTER */
 .ft{flex:none;background:var(--inv);color:var(--invFg)}
 .ft-g{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--hair)}
-.ft-c{background:var(--inv);padding:15px 12px 14px;text-align:center}
-.ft-n{font-family:var(--ex);font-size:19px}
+.ft-c{background:var(--inv);padding:15px 12px 14px}
+.ft-n{font-family:var(--ex);font-size:20px;letter-spacing:-.01em}
 .ft-l{font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:300;color:var(--mid);margin-top:5px}
-.ft-b{border-top:1px solid var(--hair);padding:13px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.ft-b{border-top:1px solid var(--hair);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .ft-t{font-size:12px;font-weight:200;font-style:italic;color:var(--mid);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ft-x{background:var(--bg);color:var(--fg);padding:13px 22px;min-height:44px;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:400;flex:none}
 .lib-ft{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);border-top:1px solid var(--hair)}
@@ -133,8 +140,10 @@ input{font-family:inherit;color:inherit;background:none;border:none;outline:none
 .ac-b{padding:16px;min-height:44px;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:400;border:1px solid var(--hair)}
 .ac-b.inv{background:var(--inv);color:var(--invFg);border-color:var(--inv)}
 .nm{width:100%;height:52px;border:1px solid var(--hair);padding:0 16px;font-family:var(--ex);font-size:16px}
-.warn{border:1px solid var(--red);color:var(--red);padding:12px 14px;font-size:12px;font-weight:300;line-height:1.6}
-.note{font-size:12.5px;font-weight:300;line-height:1.75;color:var(--fg)}
+.nm:focus{border-color:var(--fg)}
+.warn{border-left:2px solid var(--red);color:var(--fg);padding:1px 0 1px 14px;font-size:12.5px;font-weight:300;line-height:1.7}
+.warn-t{font-size:9px;font-weight:300;letter-spacing:.32em;text-transform:uppercase;color:var(--red);margin-bottom:7px}
+.note{font-size:12.5px;font-weight:300;line-height:1.75;color:var(--fg);text-wrap:pretty}
 </style>
 </head>
 <body>
@@ -368,8 +377,8 @@ function wInfo(W){
   if(W<180)return['Farinha muito fraca. Uso restrito a baixa hidratação e fermentação curta.','55–62%. Não suporta bassinage.','Máximo 4–6h em ambiente. Sem retardo.'];
   if(W<240)return['Farinha fraca. Boa extensibilidade, pouca elasticidade.','58–65%. Bassinage com cautela acima de 62%.','6–12h, sem retardo prolongado.'];
   if(W<300)return['Farinha média. Versátil — napolitana clássica e pão.','63–72%. Bassinage viável acima de 68%.','12–24h. Suporta retardo curto de 12–18h a 4 °C.'];
-  if(W<360)return['Farinha forte. Faixa do blend QT — fermentação longa e biga.','70–80%. Bassinage recomendada acima de 75%.','24–48h. Ideal com biga ou retardo de 24–48h a 4 °C.'];
-  if(W<420)return['Farinha muito forte. Fermentações ultra-longas, biga obrigatória.','75–85%. Bassinage necessária acima de 78%.','48–72h ou mais. Cold retard de 48h+.'];
+  if(W<360)return['Farinha forte. Fermentação longa e biga.','70–80%. Bassinage recomendada acima de 75%.','24–48h. Ideal com biga ou retardo de 24–48h a 4 °C.'];
+  if(W<420)return['Farinha muito forte. Fermentações ultra-longas, biga obrigatória.','75–85%','48–72h ou mais. Cold retard de 48h+.'];
   return['Farinha especial. Use em blend com farinhas médias para equilibrar.','Em blend. Pura fica difícil de abrir.','Longa, sempre em blend.'];
 }
 const curW=()=>{if(S.wMode==='unica')return S.wSingle;
@@ -398,11 +407,10 @@ const segmented=(opts,cur,fn,cols)=>
 const rows=list=>list.map(r=>`<div class="rw"><span class="rw-k">${r.k}</span><span class="rw-v">${r.v}</span></div>`).join('');
 const outGrid=(cells,small)=>`<div class="og">${cells.map(c=>
  `<div class="oc"><div class="oc-n"${small?' style="font-size:17px"':''}>${c.v}${c.u?`<span class="oc-u">${c.u}</span>`:''}</div><div class="oc-l">${c.l}</div></div>`).join('')}</div>`;
-const item=(nome,meta,onOpen,onDel)=>
- `<div class="it"><button class="it-m" onclick="${onOpen}"><div class="it-n">${esc(nome)}</div><div class="it-d">${meta}</div></button>
+const item=(nome,meta,onOpen,onDel,num)=>
+ `<div class="it">${num?`<div class="it-x">${num}</div>`:''}<button class="it-m" onclick="${onOpen}"><div class="it-n">${esc(nome)}</div><div class="it-d">${meta}</div></button>
   ${onDel?`<button class="it-a bd" onclick="${onDel}" aria-label="apagar">×</button>`:'<div class="it-a">→</div>'}</div>`;
-const secTitle=(ov,disp,sub)=>`<div><div class="ov">${ov}</div><div class="disp" style="margin-top:8px">${disp}</div>
-  ${sub?`<div class="ttl-s">${sub}</div>`:''}</div><div class="hair"></div>`;
+const secTitle=(ov,disp,sub)=>`<div class="sec">${ov?`<div class="ov">${ov}</div>`:''}<div class="sec-d">${disp}</div>${sub?`<div class="sec-s">${sub}</div>`:''}<div class="sec-h"></div></div>`;
 const metaTxt=r=>{const hp=r.pre==='nenhum'?0:(r.pre==='poolish'?(r.poolishH||12):BIGA_H);
   const h=(r.hAmb||0)+(r.hCtrl||0)+hp;
   return r.bolas+' × '+n(r.pbola,0)+' g · '+n(r.hidra,0)+'% · '+n(h,0)+'h · '+
@@ -411,42 +419,33 @@ const metaTxt=r=>{const hp=r.pre==='nenhum'?0:(r.pre==='poolish'?(r.poolishH||12
 /* ── VIEWS ── */
 function vLib(){
   const c=S.recipes.length;
-  const sub=c===0?'nenhuma receita salva':c+(c===1?' receita salva':' receitas salvas');
-  const st=S.sync==='ok'?'Sincronizado na nuvem.'
-         :S.sync==='err'?'Sem conexão — salvo neste aparelho; sincroniza quando a internet voltar.':'';
-  return `<div><div class="ttl">Receitas</div><div class="ttl-s">${sub}${st?' · '+st:''}</div></div>
+  return secTitle('','Receitas','')+`
    ${c>0?`<div class="blk"><div class="ov">Suas receitas</div>
      ${S.recipes.map((r,i)=>item(r.name,metaTxt(r),`A.open(S.recipes[${i}])`,`A.del('${esc(r.name).replace(/'/g,"\\'")}')`)).join('')}</div>`
-    :`<div class="dica">Comece por «Nova receita» — o que você salvar aparece aqui.</div>`}
-   <div class="blk"><div class="ov">Quem está usando</div>
-    <div class="g2"><input class="nm" value="${esc(S.aluno)}" placeholder="Seu nome"
+    :''}
+   <div class="blk">
+    <div class="g2"><input class="nm" value="${esc(S.aluno)}" placeholder="Nome"
       onchange="A.id('aluno',this.value)" aria-label="Seu nome">
-    <input class="nm" value="${esc(S.turma)}" placeholder="Turma"
-      onchange="A.id('turma',this.value)" aria-label="Turma"></div>
-    <div class="dica">Identifique-se para o professor reconhecer suas receitas.</div></div>`;
+    <input class="nm" value="${esc(S.turma)}" placeholder="Sobrenome"
+      onchange="A.id('turma',this.value)" aria-label="Turma"></div></div>`;
 }
 
 function vStep0(){
   const p=S.p;
-  return secTitle('Passo 01','Massa','quantas bolas, que peso.')
+  return secTitle('','Massa','')
    +stepper('Nº de bolas',p.bolas,'un',"A.setP('bolas',-1,1,60)","A.setP('bolas',1,1,60)",0,['p.bolas',1,60,0])
    +stepper('Peso por bola',n(p.pbola,0),'g',"A.setP('pbola',-5,150,600)","A.setP('pbola',5,150,600)",0,['p.pbola',150,600,0])
-   +stepper('Margem de perda',n(p.perda,1),'%',"A.setP('perda',-0.5,0,15)","A.setP('perda',0.5,0,15)",0,['p.perda',0,15,1])
-   +`<div class="dica">A margem cobre a massa que fica na masseira e na bancada. Zere para peso exato.</div>`;
+   +stepper('Margem de perda',n(p.perda,1),'%',"A.setP('perda',-0.5,0,15)","A.setP('perda',0.5,0,15)",0,['p.perda',0,15,1]);
 }
 
 function vStep1(){
   const p=S.p,c=calc();
   const pos=Math.max(0,Math.min(100,(p.hidra-55)/30*100));
-  const txt=p.hidra<62?'Baixa — massa firme, abertura difícil.':p.hidra<70?'Média — estrutura sólida, W a partir de 300.'
-    :p.hidra<75?'Referência napolitana clássica. W ≥ 330.':p.hidra<80?'Alta — extensibilidade excelente. W ≥ 350.'
-    :'Muito alta — farinha forte e bassinage.';
-  return secTitle('Passo 02','Água','quanta água, quanto sal.')
+  return secTitle('','Água','')
    +stepper('Hidratação',n(p.hidra,1),'%',"A.setP('hidra',-0.5,50,90)","A.setP('hidra',0.5,50,90)",0,['p.hidra',50,90,1])
    +stepper('Sal',n(p.sal,1),'%',"A.setP('sal',-0.1,0,5)","A.setP('sal',0.1,0,5)",0,['p.sal',0,5,1])
    +`<div><div class="rl"><div class="rl-m" style="left:${pos}%"></div></div>
-     <div class="rl-s"><span>55</span><span>62</span><span>70</span><span>77</span><span>85</span></div>
-     <div class="dica" style="margin-top:14px">${txt}</div></div>`
+     <div class="rl-s"><span>55</span><span>62</span><span>70</span><span>77</span><span>85</span></div></div>`
    +`<div class="g2">${stepper('Malte',n(p.malte,1),'%',"A.setP('malte',-0.1,0,5)","A.setP('malte',0.1,0,5)",1,['p.malte',0,5,1])}
      ${stepper('Azeite',n(p.azeite,1),'%',"A.setP('azeite',-0.1,0,10)","A.setP('azeite',0.1,0,10)",1,['p.azeite',0,10,1])}</div>`;
 }
@@ -457,26 +456,20 @@ function vStep2(){
   const preName=p.pre==='poolish'?'Poolish':'Biga';
   let extra='';
   if(hasPre){
-    extra+=stepper(preName+' — % da farinha',n(p.prePct,1),'%',"A.setP('prePct',-1,5,95)","A.setP('prePct',1,5,95)",0,['p.prePct',5,95,1]);
+    extra+=stepper('% da farinha na '+preName,n(p.prePct,1),'%',"A.setP('prePct',-1,5,95)","A.setP('prePct',1,5,95)",0,['p.prePct',5,95,1]);
     if(p.pre==='poolish')
       extra+=stepper('Fermentação do poolish (18 °C)',n(p.poolishH,1),'h',"A.setP('poolishH',-0.5,1,24)","A.setP('poolishH',0.5,1,24)",0,['p.poolishH',1,24,1]);
-    extra+=`<div class="dica">${n(c.dosePre,2)}% de fermento sobre a farinha ${p.pre==='poolish'?'do poolish':'da biga'}.
-      ${c.levr>0.0001?'O impasto finale completa o que a maturação não cobre.':'O pré-fermento maduro sozinho já supre a receita — impasto finale sem fermento.'}</div>`;
-    if(c.excesso>1.15) extra+=`<div class="warn">${preName} madur${p.pre==='poolish'?'o':'a'} equivale a ${n(c.excesso,1)}× o fermento
-      que este protocolo de ${n(c.horas,0)}h pede. A dose de ${preName.toLowerCase()} pressupõe fermentação final curta —
-      com retardo longo, reduza a % de farinha${p.pre==='poolish'?' ou aumente as horas':''}.</div>`;
   }
-  return secTitle('Passo 03','Fermento','tipo, tempo e temperatura.')
+  return secTitle('','Fermento','')
    +`<div class="blk"><div class="st-lb">Tipo</div>${segmented([['Fresco','fresco'],['Seco','seco'],['Levain','natural']],p.tipo,"A.tipo")}</div>`
    +`<div class="blk"><div class="st-lb">Pré-fermento</div>${segmented([['Sem','nenhum'],['Biga','biga'],['Poolish','poolish']],p.pre,"A.pre")}</div>`
    +`<div class="g2">
-      ${stepper('Ambiente °C',n(p.tAmb,0),'',"A.setP('tAmb',-1,2,35)","A.setP('tAmb',1,2,35)",1,['p.tAmb',2,35,0])}
-      ${stepper('Ambiente h',n(p.hAmb,1),'',"A.setP('hAmb',-0.5,0,72)","A.setP('hAmb',0.5,0,72)",1,['p.hAmb',0,72,1])}
-      ${stepper('Câmara °C',n(p.tCtrl,0),'',"A.setP('tCtrl',-1,2,20)","A.setP('tCtrl',1,2,20)",1,['p.tCtrl',2,20,0])}
-      ${stepper('Câmara h',n(p.hCtrl,1),'',"A.setP('hCtrl',-0.5,0,72)","A.setP('hCtrl',0.5,0,72)",1,['p.hCtrl',0,72,1])}</div>`
+      ${stepper('Temperatura Ambiente',n(p.tAmb,0),'',"A.setP('tAmb',-1,2,35)","A.setP('tAmb',1,2,35)",1,['p.tAmb',2,35,0])}
+      ${stepper('Horas Ambiente',n(p.hAmb,1),'',"A.setP('hAmb',-0.5,0,72)","A.setP('hAmb',0.5,0,72)",1,['p.hAmb',0,72,1])}
+      ${stepper('Temperatura Geladeira',n(p.tCtrl,0),'',"A.setP('tCtrl',-1,2,20)","A.setP('tCtrl',1,2,20)",1,['p.tCtrl',2,20,0])}
+      ${stepper('Horas Geladeira',n(p.hCtrl,1),'',"A.setP('hCtrl',-0.5,0,72)","A.setP('hCtrl',0.5,0,72)",1,['p.hCtrl',0,72,1])}</div>`
    +extra
-   +`<div class="dz"><div><div class="ov">Dose calculada</div>
-      <div class="dz-s">${n(c.lev,3)} % da farinha</div></div>
+   +`<div class="dz"><div class="ov">Fermento total</div>
       <div><span class="dz-n">${g(c.levg)}</span><span class="dz-u">g</span></div></div>`;
 }
 
@@ -484,7 +477,7 @@ function vStep3(){
   const p=S.p,c=calc();
   const cells=[{v:g(c.far),u:'g',l:'Farinha'},{v:g(c.agua),u:'g',l:'Água'},
                {v:g(c.salg),u:'g',l:'Sal'},{v:g(c.levg),u:'g',l:'Fermento'}];
-  let out=secTitle('Passo 04','Ficha','a receita fechada.')+outGrid(cells);
+  let out=secTitle('','Ficha','')+outGrid(cells);
   const ex=[];
   if(p.malte>0)ex.push({k:'Malte',v:g(c.maltg)+' g'});
   if(p.azeite>0)ex.push({k:'Azeite',v:g(c.azg)+' g'});
@@ -492,10 +485,10 @@ function vStep3(){
   if(p.pre!=='nenhum'){
     const preName=p.pre==='poolish'?'Poolish':'Biga';
     out+=`<div class="blk"><div class="ov">${preName} — ${n(p.prePct,0)}% da farinha${p.pre==='poolish'?' · '+n(p.poolishH,0)+'h':''}</div>
-      ${rows([{k:'Farinha',v:g(c.fb)+' g'},{k:'Água',v:g(c.ab)+' g'},
+      ${rows([{k:'Farinha '+preName,v:g(c.fb)+' g'},{k:'Água '+preName,v:g(c.ab)+' g'},
               {k:'Fermento',v:g(c.levb)+' g'},{k:'Total',v:g(c.fb+c.ab+c.levb)+' g'}])}</div>`;
     out+=`<div class="blk"><div class="ov">Impasto finale</div>
-      ${rows([{k:'Farinha remanescente',v:g(c.fr)+' g'},{k:'Água remanescente',v:g(c.ar)+' g'},
+      ${rows([{k:'Farinha Final',v:g(c.fr)+' g'},{k:'Água Final',v:g(c.ar)+' g'},
               {k:'Sal',v:g(c.salg)+' g'},
               {k:'Fermento',v:c.levr>0.005?g(c.levr)+' g':'sem fermento'},
               {k:'Massa total',v:g(c.total)+' g'}])}</div>`;
@@ -506,22 +499,22 @@ function vStep3(){
   if(p.pre!=='nenhum')out+=`<div class="blk"><div class="ov">Tempo total</div>
     ${rows([{k:(p.pre==='poolish'?'Poolish':'Biga')+' (18 °C)',v:n(c.horasPre,0)+'h'},
             {k:'Massa final',v:n(c.horas,0)+'h'},{k:'Total',v:n(c.horasReal,0)+'h'}])}</div>`;
-  if(p.perda>0)out+=`<div class="dica">Inclui ${n(p.perda,1)}% de margem de perda — ${g(c.total-c.total/(1+p.perda/100))} g acima do peso nominal das bolas.</div>`;
-  out+=`<input class="nm" value="${esc(S.nome)}" oninput="A.nome(event)" aria-label="Nome da receita">
+  out+=`<div><div class="st-lb">Nome da receita</div>
+    <input class="nm" value="${esc(S.nome)}" oninput="A.nome(event)" aria-label="Nome da receita"></div>
     <div class="ac"><button class="ac-b" onclick="A.copiar()">${S.copied?'Copiado':'Copiar ficha'}</button>
     <button class="ac-b inv" onclick="A.salvar()">${S.saved?'Salva ✓':'Salvar receita'}</button></div>`;
   return out;
 }
 
 function vTools(){
-  const T=[['Força W','Farinha única ou blend, com faixa de hidratação e fermentação.','w'],
-    ['Bassinage','Água que entra depois, em etapas.','bass'],
-    ['Rendimento','Quantas bolas dá a farinha que você tem.','rend'],
-    ['Escalar','Ajuste a receita para mais ou menos bolas.','esc'],
-    ['Conversões','Temperatura e equivalência de fermento.','conv'],
-    ['Forno','Tempo, piso e cúpula por estilo.','forno']];
-  return `<div><div class="ttl">Ferramentas</div><div class="ttl-s">cálculos de apoio</div></div>
-   <div class="blk">${T.map(t=>item(t[0],t[1],`A.go('${t[2]}')`)).join('')}</div>`;
+  const T=[['Força W','A farinha que você tem.','w'],
+    ['Bassinage','A água que entra depois.','bass'],
+    ['Rendimento','Quantas bolas dá a farinha.','rend'],
+    ['Escalar','Mais ou menos bolas.','esc'],
+    ['Conversões','Temperatura e fermento.','conv'],
+    ['Forno','Tempo, piso e cúpula.','forno']];
+  return secTitle('Apoio','Ferramentas','')
+   +`<div class="blk">${T.map((t,i)=>item(t[0],t[1],`A.go('${t[2]}')`,null,'0'+(i+1))).join('')}</div>`;
 }
 
 function vW(){
@@ -548,10 +541,10 @@ function vW(){
       <span style="font-size:12px;font-weight:300;color:var(--mid)">${S.wMode==='unica'?'W da farinha':'W médio do blend'}</span>
       <span class="ex" style="font-size:34px">${W>=100?Math.round(W):'—'}</span></div>
     <div class="hair" style="margin:16px 0"></div>
-    ${[['Leitura',wi[0]],['Hidratação',wi[1]],['Fermentação',wi[2]]].map(x=>
+    ${[['Leitura',wi[0]],['Hidratação recomendada',wi[1]]].map(x=>
       `<div style="margin-bottom:14px"><div class="ov" style="font-size:8.5px">${x[0]}</div>
        <div class="note" style="margin-top:5px">${x[1]}</div></div>`).join('')}</div>`;
-  return `<div><div class="ttl">Força W</div><div class="ttl-s">força da farinha</div></div>`+body;
+  return secTitle('Ferramenta 01','Força W','a farinha que você tem.')+body;
 }
 
 function vBass(){
@@ -560,16 +553,13 @@ function vBass(){
   const ab=far*S.bassBase/100, af=far*S.bassFinal/100, ex=af-ab, d=S.bassFinal-S.bassBase;
   const proto=ex<=0?'Hidratação final igual ou menor que a base. Não há bassinage a fazer.'
     :d<=5?'Delta pequeno. Incorpore a água extra de uma vez, depois do ponto de véu, em velocidade baixa.'
-    :d<=10?'Duas etapas. Metade da água extra ao atingir o véu, 2 min de descanso, depois o restante. Sal só no fim.'
+    :d<=10?'Colocar a primeira parte junto da farinha e deixar formar o glúten. Só depois adicionar o restante.'
     :'Três ou mais etapas de '+g(ex/3)+' g, com 2–3 min de descanso entre elas. A massa precisa reabsorver antes da próxima.';
-  const av=W<260&&d>8?'Atenção: W '+Math.round(W)+' não sustenta esse delta. Reduza a hidratação final ou troque a farinha.'
-    :'Água gelada nas últimas etapas ajuda a segurar a temperatura final da massa.';
-  return `<div><div class="ttl">Bassinage</div><div class="ttl-s">água tardia</div></div>
+  return secTitle('Ferramenta 02','Bassinage','a água que entra depois.')+`
    <div class="g2">${stepper('Hidratação base',n(S.bassBase,1),'%',"A.num('bassBase',-0.5,40,90)","A.num('bassBase',0.5,40,90)",1,['bassBase',40,90,1])}
     ${stepper('Hidratação final',n(S.bassFinal,1),'%',"A.num('bassFinal',-0.5,40,95)","A.num('bassFinal',0.5,40,95)",1,['bassFinal',40,95,1])}</div>
    ${outGrid([{v:g(ab),u:'g',l:'Água na mistura'},{v:ex>0?g(ex):'0',u:'g',l:'Água tardia'}])}
-   <div class="blk"><div class="ov">Protocolo</div><div class="note">${proto}</div></div>
-   <div class="dica">${av}</div>`;
+   <div class="blk"><div class="ov">Protocolo</div><div class="note">${proto}</div></div>`;
 }
 
 function vRend(){
@@ -577,7 +567,7 @@ function vRend(){
   const soma=1+p.hidra/100+p.sal/100+c.lev/100+p.malte/100+p.azeite/100;
   const tot=S.rendFar*soma, bolas=Math.floor(tot/(p.pbola*(1+(p.perda||0)/100)));
   const sobra=tot-bolas*p.pbola*(1+(p.perda||0)/100);
-  return `<div><div class="ttl">Rendimento</div><div class="ttl-s">quanto rende</div></div>
+  return secTitle('Ferramenta 03','Rendimento','quantas bolas dá a farinha.')+`
    ${stepper('Farinha disponível',g(S.rendFar),'g',"A.num('rendFar',-250,250,50000)","A.num('rendFar',250,250,50000)",0,['rendFar',250,50000,0])}
    <div style="border:1px solid var(--hair);padding:20px;text-align:center">
      <div class="ov">Bolas de ${n(p.pbola,0)} g</div>
@@ -592,7 +582,7 @@ function vEsc(){
   const ing=[['Farinha',c.far],['Água',c.agua],['Sal',c.salg],['Fermento',c.levg]];
   if(S.p.malte>0)ing.push(['Malte',c.maltg]);
   if(S.p.azeite>0)ing.push(['Azeite',c.azg]);
-  return `<div><div class="ttl">Escalar</div><div class="ttl-s">mais ou menos bolas</div></div>
+  return secTitle('Ferramenta 04','Escalar','a mesma receita, outra quantidade.')+`
    <div class="g2">${stepper('Original',String(e.orig),'un',"A.escala('orig',-1)","A.escala('orig',1)",1,['escala.orig',1,200,0])}
     ${stepper('Desejado',String(e.dest),'un',"A.escala('dest',-1)","A.escala('dest',1)",1,['escala.dest',1,200,0])}</div>
    <div style="border:1px solid var(--hair);padding:18px;display:flex;justify-content:space-between;align-items:baseline">
@@ -603,7 +593,7 @@ function vEsc(){
 }
 
 function vConv(){
-  return `<div><div class="ttl">Conversões</div><div class="ttl-s">equivalências</div></div>
+  return secTitle('Ferramenta 05','Conversões','temperatura e fermento.')+`
    <div class="blk"><div class="ov">Temperatura</div>
     <div class="st"><button class="st-b" onclick="A.num('cvC',-5,-20,600)">−</button>
      <div class="st-v"><span class="ex" style="font-size:24px">${S.cvC} °C</span>
@@ -617,7 +607,7 @@ function vConv(){
 
 function vForno(){
   const fo=FORNO[S.fEstilo],ft=FTIPO[S.fTipo];
-  return `<div><div class="ttl">Forno</div><div class="ttl-s">assamento</div></div>
+  return secTitle('Ferramenta 06','Forno','tempo, piso e cúpula.')+`
    <div class="blk"><div class="st-lb">Estilo</div>
     ${segmented(Object.keys(FORNO).map(k=>[FORNO[k].n,k]),S.fEstilo,"A.fEstilo",3)}</div>
    <div class="blk"><div class="st-lb">Forno</div>
