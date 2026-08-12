@@ -186,7 +186,9 @@ const rate=t=>Math.pow(FERM_Q,Math.max(2,Math.min(35,t))-20);
 const poolishPct=h=>POOLISH_A*Math.exp(-POOLISH_K*Math.max(1,Math.min(24,h)));
 
 // Ponto de partida de uma receita nova: massa direta de 24h, neutra.
-const DEFAULT={bolas:6,pbola:260,hidra:65,sal:3,malte:0,azeite:0,perda:3,tipo:'fresco',pre:'nenhum',prePct:50,poolishH:12,tAmb:20,hAmb:2,tCtrl:4,hCtrl:22};
+const DEFAULT={bolas:6,pbola:260,hidra:65,sal:3,malte:0,azeite:0,perda:3,tipo:'fresco',pre:'nenhum',prePct:50,poolishH:12,ctrl:true,tAmb:20,hAmb:2,tCtrl:4,hCtrl:22};
+// Receita salva antes do botão de geladeira não tem o campo: sem ele, vale usar.
+const usaCtrl=p=>p.ctrl!==false;
 let S={view:'lib',step:0,dark:false,nome:'Nova receita',p:{...DEFAULT},recipes:[],
   aluno:'',turma:'',pendDel:[],sync:'',
   copied:false,saved:false,wMode:'unica',wSingle:330,blend:[{pct:70,w:340},{pct:30,w:300}],
@@ -195,7 +197,8 @@ let S={view:'lib',step:0,dark:false,nome:'Nova receita',p:{...DEFAULT},recipes:[
 /* ── CÁLCULO ── */
 function calc(){
   const p=S.p;
-  const E=rate(p.tAmb)*p.hAmb + rate(p.tCtrl)*p.hCtrl;
+  const hCtrl = usaCtrl(p) ? p.hCtrl : 0;
+  const E=rate(p.tAmb)*p.hAmb + rate(p.tCtrl)*hCtrl;
   let direta = E>0 ? FERM_A*Math.pow(E,-FERM_P) : 5;
   direta = Math.max(0.005, Math.min(5, direta));
 
@@ -227,8 +230,8 @@ function calc(){
   const fb = p.pre!=='nenhum' ? far*p.prePct/100 : 0;
   const ab = fb*HP, levb = far*levPre/100, levr = far*levRef/100;
   const horasPre = p.pre==='nenhum' ? 0 : (p.pre==='poolish' ? p.poolishH : BIGA_H);
-  return {far,agua,salg,levg,maltg,azg,lev,total,horas:p.hAmb+p.hCtrl,
-    horasPre, horasReal:horasPre+p.hAmb+p.hCtrl,
+  return {far,agua,salg,levg,maltg,azg,lev,total,horas:p.hAmb+hCtrl,
+    horasPre, horasReal:horasPre+p.hAmb+hCtrl,
     fb,ab,levb,fr:far-fb,ar:agua-ab,levr,direta,dosePre,prePctF,
     excesso: direta>0 ? PRE_CREDIT*prePctF/direta : 0};
 }
@@ -314,6 +317,7 @@ A.st=(k,v)=>{S[k]=v;render();};
 A.tipo=v=>A.setV('tipo',v);
 A.pre=v=>A.setV('pre',v);
 A.wMode=v=>A.st('wMode',v);
+A.ctrl=v=>A.setV('ctrl',v==='sim');
 A.nome=e=>{S.nome=e.target.value;S.saved=false;};
 A.salvar=()=>{const nome=(S.nome||'Sem nome').trim();
   S.recipes=S.recipes.filter(r=>r.name!==nome).concat([{...S.p,name:nome}]);
@@ -351,7 +355,8 @@ A.copiar=()=>{
   if(p.perda>0)L.push('Margem de perda '+n(p.perda,1)+'%');
   L.push(p.bolas+' bolas de '+n(p.pbola,0)+' g','',
     'FERMENTAÇÃO — '+n(c.horasReal,0)+'h no total',
-    '  '+n(p.hAmb,0)+'h a '+p.tAmb+' °C (ambiente)','  '+n(p.hCtrl,0)+'h a '+p.tCtrl+' °C (câmara)');
+    '  '+n(p.hAmb,0)+'h a '+p.tAmb+' °C (ambiente)');
+  if(usaCtrl(p))L.push('  '+n(p.hCtrl,0)+'h a '+p.tCtrl+' °C (geladeira)');
   if(p.pre!=='nenhum'){
     L.push('',(p.pre==='biga'?'BIGA':'POOLISH')+' — '+n(p.prePct,0)+'% da farinha'
       +(p.pre==='poolish'?' · '+n(p.poolishH,0)+'h a 18 °C':''));
@@ -368,10 +373,10 @@ A.copiar=()=>{
 };
 
 function wInfo(W){
-  if(W<180)return['Farinha muito fraca. Uso restrito a baixa hidratação e fermentação curta.','55–62%. Não suporta bassinage.','Máximo 4–6h em ambiente. Sem retardo.'];
-  if(W<240)return['Farinha fraca. Boa extensibilidade, pouca elasticidade.','58–65%. Bassinage com cautela acima de 62%.','6–12h, sem retardo prolongado.'];
-  if(W<300)return['Farinha média. Versátil — napolitana clássica e pão.','63–72%. Bassinage viável acima de 68%.','12–24h. Suporta retardo curto de 12–18h a 4 °C.'];
-  if(W<360)return['Farinha forte. Fermentação longa e biga.','70–80%. Bassinage recomendada acima de 75%.','24–48h. Ideal com biga ou retardo de 24–48h a 4 °C.'];
+  if(W<180)return['Farinha muito fraca. Uso restrito a baixa hidratação e fermentação curta.','55–62%','Máximo 4–6h em ambiente. Sem retardo.'];
+  if(W<240)return['Farinha fraca. Boa extensibilidade, pouca elasticidade.','58–65%','6–12h, sem retardo prolongado.'];
+  if(W<300)return['Farinha média. Versátil — napolitana clássica e pão.','63–72%','12–24h. Suporta retardo curto de 12–18h a 4 °C.'];
+  if(W<360)return['Farinha forte. Fermentação longa e biga.','70–80%','24–48h. Ideal com biga ou retardo de 24–48h a 4 °C.'];
   if(W<420)return['Farinha muito forte. Fermentações ultra-longas, biga obrigatória.','75–85%','48–72h ou mais. Cold retard de 48h+.'];
   return['Farinha especial. Use em blend com farinhas médias para equilibrar.','Em blend. Pura fica difícil de abrir.','Longa, sempre em blend.'];
 }
@@ -406,7 +411,7 @@ const item=(nome,meta,onOpen,onDel,num)=>
   ${onDel?`<button class="it-a bd" onclick="${onDel}" aria-label="apagar">×</button>`:'<div class="it-a">→</div>'}</div>`;
 const secTitle=(ov,disp,sub)=>`<div class="sec">${ov?`<div class="ov">${ov}</div>`:''}<div class="sec-d">${disp}</div>${sub?`<div class="sec-s">${sub}</div>`:''}<div class="sec-h"></div></div>`;
 const metaTxt=r=>{const hp=r.pre==='nenhum'?0:(r.pre==='poolish'?(r.poolishH||12):BIGA_H);
-  const h=(r.hAmb||0)+(r.hCtrl||0)+hp;
+  const h=(r.hAmb||0)+(usaCtrl(r)?(r.hCtrl||0):0)+hp;
   return r.bolas+' × '+n(r.pbola,0)+' g · '+n(r.hidra,0)+'% · '+n(h,0)+'h · '+
     (r.pre==='nenhum'?'direta':r.pre==='poolish'?'poolish':'biga');};
 
@@ -459,9 +464,12 @@ function vStep2(){
    +`<div class="blk"><div class="st-lb">Pré-fermento</div>${segmented([['Sem','nenhum'],['Biga','biga'],['Poolish','poolish']],p.pre,"A.pre")}</div>`
    +`<div class="g2">
       ${stepper('Temperatura Ambiente',n(p.tAmb,0),'',"A.setP('tAmb',-1,2,35)","A.setP('tAmb',1,2,35)",1,['p.tAmb',2,35,0])}
-      ${stepper('Horas Ambiente',n(p.hAmb,1),'',"A.setP('hAmb',-0.5,0,72)","A.setP('hAmb',0.5,0,72)",1,['p.hAmb',0,72,1])}
+      ${stepper('Horas Ambiente',n(p.hAmb,1),'',"A.setP('hAmb',-0.5,0,72)","A.setP('hAmb',0.5,0,72)",1,['p.hAmb',0,72,1])}</div>`
+   +`<div class="blk"><div class="st-lb">Temperatura controlada</div>
+      ${segmented([['Não','nao'],['Sim','sim']],usaCtrl(p)?'sim':'nao',"A.ctrl")}</div>`
+   +(usaCtrl(p)?`<div class="g2">
       ${stepper('Temperatura Geladeira',n(p.tCtrl,0),'',"A.setP('tCtrl',-1,2,20)","A.setP('tCtrl',1,2,20)",1,['p.tCtrl',2,20,0])}
-      ${stepper('Horas Geladeira',n(p.hCtrl,1),'',"A.setP('hCtrl',-0.5,0,72)","A.setP('hCtrl',0.5,0,72)",1,['p.hCtrl',0,72,1])}</div>`
+      ${stepper('Horas Geladeira',n(p.hCtrl,1),'',"A.setP('hCtrl',-0.5,0,72)","A.setP('hCtrl',0.5,0,72)",1,['p.hCtrl',0,72,1])}</div>`:'')
    +extra
    +`<div class="dz"><div class="ov">Fermento total</div>
       <div><span class="dz-n">${g(c.levg)}</span><span class="dz-u">g</span></div></div>`;
