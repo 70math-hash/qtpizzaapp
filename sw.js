@@ -2,9 +2,11 @@
 // HTML: rede primeiro, para cada deploy chegar na hora; o cache é reserva
 // para abrir offline. Demais arquivos (ícones, fontes): cache primeiro.
 // Dados do Supabase nunca passam por aqui — sincronização é sempre rede.
-const CACHE = 'qtpizzapp-v1';
+const CACHE = 'qtpizzapp-v2';
 const SHELL = ['/', '/qt_pizzapp.html', '/manifest.webmanifest',
-  '/icons/icon-192.png', '/icons/icon-512.png'];
+  '/icons/negativa/icon-192.png', '/icons/negativa/icon-512.png',
+  '/icons/negativa/apple-touch-icon.png', '/icons/negativa/favicon-32.png',
+  '/icons/positiva/favicon-32.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
